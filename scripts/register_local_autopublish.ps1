@@ -6,14 +6,14 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-$scriptPath = (Resolve-Path (Join-Path $PSScriptRoot "publish_dashboard_data.py")).Path
+$runnerScriptPath = (Resolve-Path (Join-Path $PSScriptRoot "run_local_autopublish.ps1")).Path
 $workbookFullPath = (Resolve-Path (Join-Path $PSScriptRoot $WorkbookPath)).Path
-$pythonPath = (Get-Command python -ErrorAction Stop).Source
+$powershellPath = (Get-Command powershell.exe -ErrorAction Stop).Source
 $triggerTime = (Get-Date).AddMinutes(1)
-$taskArgs = '"' + $scriptPath + '" --workbook "' + $workbookFullPath + '"'
-$action = New-ScheduledTaskAction -Execute $pythonPath -Argument $taskArgs
+$taskArgs = '-NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -File "' + $runnerScriptPath + '" -WorkbookPath "' + $workbookFullPath + '"'
+$action = New-ScheduledTaskAction -Execute $powershellPath -Argument $taskArgs
 $trigger = New-ScheduledTaskTrigger -Once -At $triggerTime -RepetitionInterval (New-TimeSpan -Minutes 1) -RepetitionDuration (New-TimeSpan -Days 3650)
-$settings = New-ScheduledTaskSettingsSet -StartWhenAvailable -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries
+$settings = New-ScheduledTaskSettingsSet -StartWhenAvailable -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -MultipleInstances IgnoreNew
 
 Register-ScheduledTask -TaskName $TaskName -Action $action -Trigger $trigger -Settings $settings -Description "Publishes the Liseo dashboard from the local workbook every minute." -Force | Out-Null
 
