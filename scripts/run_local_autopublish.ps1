@@ -14,6 +14,7 @@ $runnerPath = if (Test-Path $pythonwPath) { $pythonwPath } else { $pythonPath }
 
 Push-Location (Split-Path $publishScript)
 try {
+    $env:PYTHONDONTWRITEBYTECODE = "1"
     & $runnerPath $publishScript --workbook $workbookFullPath
     if ($LASTEXITCODE -ne 0) {
         throw "Local dashboard publish failed with exit code $LASTEXITCODE."
