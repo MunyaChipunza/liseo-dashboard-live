@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import base64
 import datetime as dt
 import html
 import json
@@ -9,6 +10,7 @@ import re
 import tempfile
 import urllib.parse
 import urllib.request
+import zipfile
 from pathlib import Path
 from typing import Any
 
@@ -104,11 +106,21 @@ def normalize_month_label(value: Any, month_num: int | None) -> str:
     return ""
 
 
-def add_download_variant(url: str) -> str:
-    parsed = urllib.parse.urlparse(url)
-    query = dict(urllib.parse.parse_qsl(parsed.query, keep_blank_values=True))
-    query["download"] = "1"
-    return urllib.parse.urlunparse(parsed._replace(query=urllib.parse.urlencode(query)))
+def with_download_hint(url: str) -> str:
+    parsed = urllib.parse.urlsplit(url)
+    query = urllib.parse.parse_qsl(parsed.query, keep_blank_values=True)
+    keys = {key.lower() for key, _ in query}
+    if "download" not in keys:
+        query.append(("download", "1"))
+    return urllib.parse.urlunsplit((parsed.scheme, parsed.netloc, parsed.path, urllib.parse.urlencode(query), parsed.fragment))
+
+
+def candidate_urls(url: str) -> list[str]:
+    candidates = [url]
+    hinted = with_download_hint(url)
+    if hinted != url:
+        candidates.append(hinted)
+    return candidates
 
 
 def extract_download_url_from_html(page_html: str) -> str | None:
@@ -127,40 +139,156 @@ def extract_download_url_from_html(page_html: str) -> str | None:
     return None
 
 
-def write_temp_workbook(payload: bytes) -> Path:
-    fd, temp_path = tempfile.mkstemp(suffix=".xlsm")
+def share_token(url: str) -> str:
+    raw = base64.b64encode(url.encode("utf-8")).decode("ascii").rstrip("=")
+    return "u!" + raw.replace("/", "_").replace("+", "-")
+
+
+def request_json(url: str, headers: dict[str, str] | None = None, data: bytes | None = None) -> dict[str, Any]:
+    request = urllib.request.Request(url, headers=headers or {}, data=data)
+    with urllib.request.urlopen(request, timeout=60) as response:
+        return json.loads(response.read().decode("utf-8"))
+
+
+def request_bytes(url: str, headers: dict[str, str] | None = None) -> bytes:
+    request = urllib.request.Request(url, headers=headers or {})
+    with urllib.request.urlopen(request, timeout=60) as response:
+        return response.read()
+
+
+def find_download_url(payload: Any) -> str | None:
+    if isinstance(payload, dict):
+        for key, value in payload.items():
+            if "downloadurl" in key.lower() and isinstance(value, str) and value.startswith("http"):
+                return value
+            found = find_download_url(value)
+            if found:
+                return found
+    elif isinstance(payload, list):
+        for item in payload:
+            found = find_download_url(item)
+            if found:
+                return found
+    return None
+
+
+def write_temp_workbook(payload: bytes, suffix: str = ".xlsm") -> Path:
+    fd, temp_path = tempfile.mkstemp(suffix=suffix)
     os.close(fd)
     path = Path(temp_path)
     path.write_bytes(payload)
     return path
 
 
+def ensure_excel_file(path: Path) -> None:
+    if zipfile.is_zipfile(path):
+        return
+    raise ValueError(f"Downloaded file is not a valid Excel workbook: {path.name}")
+
+
+def guessed_name(url: str, headers: Any) -> str:
+    content_disposition = headers.get("Content-Disposition", "")
+    if "filename=" in content_disposition:
+        filename = content_disposition.split("filename=", 1)[1].strip().strip('"')
+        if filename:
+            return filename
+
+    parsed = urllib.parse.urlsplit(url)
+    filename = Path(parsed.path).name
+    if filename:
+        return filename
+    return "downloaded_workbook.xlsm"
+
+
+def onedrive_badger_headers() -> dict[str, str]:
+    token_payload = request_json(
+        "https://api-badgerp.svc.ms/v1.0/token",
+        headers={"Content-Type": "application/json", "User-Agent": "Mozilla/5.0"},
+        data=json.dumps({"appId": "5cbed6ac-a083-4e14-b191-b4ba07653de2"}).encode("utf-8"),
+    )
+    token = token_payload.get("token")
+    if not token:
+        raise RuntimeError("Could not get OneDrive public access token.")
+    return {
+        "Authorization": f"Badger {token}",
+        "Prefer": "autoredeem",
+        "User-Agent": "Mozilla/5.0",
+        "Accept": "application/json, */*",
+    }
+
+
+def download_onedrive_share(url: str) -> Path:
+    token = share_token(url)
+    headers = onedrive_badger_headers()
+    metadata = request_json(f"https://api.onedrive.com/v1.0/shares/{token}/driveItem", headers=headers)
+
+    download_url = find_download_url(metadata)
+    if download_url:
+        data = request_bytes(download_url, headers={"User-Agent": "Mozilla/5.0"})
+        filename = metadata.get("name") or guessed_name(download_url, {})
+        suffix = Path(filename).suffix or ".xlsm"
+        target = write_temp_workbook(data, suffix=suffix)
+        ensure_excel_file(target)
+        return target
+
+    for content_url in (
+        f"https://api.onedrive.com/v1.0/shares/{token}/driveItem/content",
+        f"https://api.onedrive.com/v1.0/shares/{token}/root/content",
+    ):
+        try:
+            data = request_bytes(content_url, headers=headers)
+            filename = metadata.get("name") or "downloaded_workbook.xlsm"
+            suffix = Path(filename).suffix or ".xlsm"
+            target = write_temp_workbook(data, suffix=suffix)
+            ensure_excel_file(target)
+            return target
+        except Exception:  # noqa: BLE001
+            continue
+
+    raise RuntimeError("OneDrive share metadata loaded, but no downloadable workbook URL was available.")
+
+
 def download_workbook(url: str) -> Path:
     headers = {"User-Agent": "Mozilla/5.0 Codex Dashboard Refresher"}
-    candidates = [url]
-    if "download=1" not in url:
-        candidates.append(add_download_variant(url))
 
     last_error: Exception | None = None
-    for candidate in candidates:
+    for candidate in candidate_urls(url):
         try:
             request = urllib.request.Request(candidate, headers=headers)
             with urllib.request.urlopen(request, timeout=60) as response:
                 payload = response.read()
+                final_url = response.geturl()
+                filename = guessed_name(final_url, response.headers)
+                suffix = Path(filename).suffix or ".xlsm"
                 content_type = response.headers.get("Content-Type", "")
                 if payload.startswith(b"PK\x03\x04"):
-                    return write_temp_workbook(payload)
+                    target = write_temp_workbook(payload, suffix=suffix)
+                    ensure_excel_file(target)
+                    return target
                 if "html" in content_type.lower():
                     nested_url = extract_download_url_from_html(payload.decode("utf-8", errors="ignore"))
                     if nested_url:
-                        nested_request = urllib.request.Request(nested_url, headers=headers)
+                        nested_request = urllib.request.Request(nested_url, headers={"User-Agent": "Mozilla/5.0"})
                         with urllib.request.urlopen(nested_request, timeout=60) as nested_response:
                             nested_payload = nested_response.read()
                             if nested_payload.startswith(b"PK\x03\x04"):
-                                return write_temp_workbook(nested_payload)
+                                nested_final_url = nested_response.geturl()
+                                nested_name = guessed_name(nested_final_url, nested_response.headers)
+                                nested_suffix = Path(nested_name).suffix or ".xlsm"
+                                target = write_temp_workbook(nested_payload, suffix=nested_suffix)
+                                ensure_excel_file(target)
+                                return target
                 raise RuntimeError(f"Workbook URL did not return an Excel file: {candidate}")
         except Exception as exc:  # noqa: BLE001
             last_error = exc
+
+    url_lower = url.lower()
+    if "1drv.ms" in url_lower or "onedrive.live.com" in url_lower:
+        try:
+            return download_onedrive_share(url)
+        except Exception as exc:  # noqa: BLE001
+            last_error = exc
+
     raise RuntimeError(f"Unable to download workbook from {url}") from last_error
 
 
