@@ -66,32 +66,72 @@ table.tm td.ttl{border-left:1px solid var(--border);font-weight:500}
 .yrs td{background:#141b2d!important;height:3px!important;padding:0!important;border:none!important}
 .leg{display:flex;align-items:center;gap:5px;font-family:'DM Mono',monospace;font-size:8px;color:var(--muted);padding:9px 14px;border-top:1px solid var(--border)}
 .ls{width:13px;height:13px;border-radius:2px}
+.view-shell{display:flex;flex-direction:column;gap:26px}
+.hidden{display:none}
+.chart-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:26px}
+.chart-panel-wide{grid-column:1 / -1}
+.chart-wrap{background:var(--surface);border:1px solid var(--border);border-radius:5px;overflow:hidden}
+.chart-stage{padding:12px 14px 0}
+.chart-svg{width:100%;height:auto;display:block}
+.chart-note{display:flex;justify-content:space-between;gap:10px;padding:0 14px 12px;font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);flex-wrap:wrap}
+.chart-legend{display:flex;flex-wrap:wrap;gap:10px;padding:0 14px 14px}
+.chart-item{display:flex;align-items:center;gap:7px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.04);padding:6px 9px;border-radius:999px;font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)}
+.chart-item strong{color:var(--text);font-weight:500}
+.sw{width:10px;height:10px;border-radius:50%}
+.chart-empty{padding:28px 20px;text-align:center;color:var(--muted);font-family:'DM Mono',monospace}
+.axis-text{font-family:'DM Mono',monospace;font-size:10px;fill:var(--muted)}
+.axis-grid{stroke:rgba(255,255,255,.08);stroke-width:1}
+.axis-base{stroke:rgba(255,255,255,.16);stroke-width:1}
 #tip{position:fixed;background:#1e2736;border:1px solid var(--accent);padding:9px 13px;border-radius:4px;font-family:'DM Mono',monospace;font-size:10px;color:var(--text);pointer-events:none;display:none;z-index:999;box-shadow:0 6px 20px rgba(0,0,0,.6);line-height:1.9}
 #tip b{color:var(--accent);display:block;margin-bottom:2px;font-size:11px}
 #empty{display:none;background:var(--surface);border:1px dashed var(--border);border-radius:8px;padding:20px 22px;color:var(--muted);font-family:'DM Mono',monospace}
-@media (max-width:720px){header,.ctrls,#sbar,.main{padding-left:16px;padding-right:16px}.hdr-meta{text-align:left}}
+@media (max-width:720px){header,.ctrls,#sbar,.main{padding-left:16px;padding-right:16px}.hdr-meta{text-align:left}.chart-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 <header><div><div style="font-family:monospace;font-size:9px;color:#64748b;letter-spacing:2px;text-transform:uppercase;margin-bottom:3px">Liseo Assembly &middot; Internal</div><div class="logo">TECHNICIAN <span>PERFORMANCE</span></div></div><div class="hdr-meta"><div>Source: <span id="sourceName">Loading...</span></div><div>Updated: <em id="updatedAt">Loading dashboard data...</em></div></div></header>
 <div id="sbar"><span><span class="dot" id="loadDot"></span><span id="loadState">Loading data</span></span><span class="chip"><b id="su">-</b>total units</span><span class="chip"><b id="sp">-</b>total points</span><span class="chip"><b id="st">-</b>technicians</span><span class="chip"><b id="sa">-</b>active now</span></div>
-<div class="ctrls"><span class="clbl">Metric</span><div class="bg"><button class="btn on" id="bU" onclick="setM('units')">Units</button><button class="btn" id="bP" onclick="setM('points')">Points</button><button class="btn" id="bS" onclick="setM('pct')">% Share</button></div><div class="sep"></div><span class="clbl">Year</span><div class="bg" id="ybtns"></div><div class="sep"></div><span class="clbl">Roster</span><div class="bg"><button class="btn on" id="bA" onclick="setSc('all')">All</button><button class="btn" id="bAO" onclick="setSc('active')">Active Only</button></div></div>
+<div class="ctrls"><span class="clbl">View</span><div class="bg"><button class="btn on" id="bVT" onclick="setView('table')">Table</button><button class="btn" id="bVC" onclick="setView('chart')">Chart</button></div><div class="sep"></div><span class="clbl">Metric</span><div class="bg"><button class="btn on" id="bU" onclick="setM('units')">Units</button><button class="btn" id="bP" onclick="setM('points')">Points</button><button class="btn" id="bS" onclick="setM('pct')">% Share</button></div><div class="sep"></div><span class="clbl">Year</span><div class="bg" id="ybtns"></div><div class="sep"></div><span class="clbl">Roster</span><div class="bg"><button class="btn on" id="bA" onclick="setSc('all')">All</button><button class="btn" id="bAO" onclick="setSc('active')">Active Only</button></div></div>
 <div class="main">
 <div id="empty"></div>
 <div class="panel"><div class="stitle"><h2>Technicians</h2><span class="pill po" id="techScopePill">ALL YEARS</span><span class="ssub" id="techScopeSub">Click a card to drill in</span></div><div class="scs" id="scs"></div></div>
-<div class="panel"><div class="stitle"><h2 id="ititle">INDIVIDUAL</h2><span class="pill po" id="ipill">UNITS</span><span class="ssub">Monthly output &middot; hover for detail</span></div><div class="hmw"><div class="hmsc"><table class="hm" id="ihm"></table></div><div class="leg" id="leg"></div></div></div>
-<div class="panel"><div class="stitle"><h2>Team Comparison</h2><span class="pill pb" id="tpill">UNITS</span><span class="ssub" id="tsub">All years &middot; month by month</span></div><div class="tmw"><div class="tmsc"><table class="tm" id="ttbl"></table></div></div></div>
+<div id="tableView" class="view-shell">
+<div class="panel"><div class="stitle"><h2 id="ititle">INDIVIDUAL</h2><span class="pill po" id="ipill">UNITS</span><span class="ssub">Monthly output table</span></div><div class="hmw"><div class="hmsc"><table class="hm" id="ihm"></table></div><div class="leg" id="leg"></div></div></div>
+<div class="panel"><div class="stitle"><h2>Team Comparison</h2><span class="pill pb" id="tpill">UNITS</span><span class="ssub" id="tsub">All years - month by month</span></div><div class="tmw"><div class="tmsc"><table class="tm" id="ttbl"></table></div></div></div>
+</div>
+<div id="chartView" class="view-shell hidden">
+<div class="chart-grid">
+<div class="panel chart-panel-wide"><div class="stitle"><h2>Individual Trend</h2><span class="pill po" id="cpill1">UNITS</span><span class="ssub" id="csub1">Selected technician versus the period average</span></div><div class="chart-wrap"><div id="chart1"></div></div></div>
+<div class="panel"><div class="stitle"><h2>Selected vs Combined</h2><span class="pill po" id="cpill2">UNITS</span><span class="ssub" id="csub2">Selected technician, rest of team, and total team trend</span></div><div class="chart-wrap"><div id="chart2"></div></div></div>
+<div class="panel"><div class="stitle"><h2>Roster Comparison</h2><span class="pill pb" id="cpill3">UNITS</span><span class="ssub" id="csub3">Visible technicians trending against one another</span></div><div class="chart-wrap"><div id="chart3"></div></div></div>
+</div>
+</div>
 </div>
 <div id="tip"></div>
 <script>
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const ORDER = ['Innocent Mhora', 'Alferis Tembo', 'Barend Nel', 'Antonio Chauque', 'James Russell', 'Talent Mutanda', 'Kuda Bope', 'Exavier Mucherera'];
+const PALETTE = ['#f97316', '#3b82f6', '#22c55e', '#ef4444', '#06b6d4', '#8b5cf6', '#eab308', '#14b8a6'];
 
 let D;
 let metric = 'units';
 let selY = 'all';
 let selT = '';
 let scope = 'all';
+let viewMode = 'table';
+
+function round1(value) {
+  return Math.round((Number(value) || 0) * 10) / 10;
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
 
 function setLoadState(text, warn) {
   document.getElementById('loadState').textContent = text;
@@ -261,16 +301,37 @@ function shortYearLabel() {
   return selY === 'all' ? 'All years' : selY;
 }
 
+function viewLabel() {
+  return viewMode === 'chart' ? 'Chart view' : 'Table view';
+}
+
 function fmtShare(value) {
-  return value > 0 ? (Number(value).toFixed(1).replace(/\.0$/, '') + '%') : '--';
+  return value > 0 ? (round1(value).toFixed(1).replace(/\.0$/, '') + '%') : '--';
 }
 
 function fmtPoints(value) {
-  return value > 0 ? Number(value).toFixed(1).replace(/\.0$/, '') : '--';
+  return value > 0 ? round1(value).toFixed(1).replace(/\.0$/, '') : '--';
 }
 
 function fmtSummaryPoints(value) {
   return Number(value).toLocaleString(undefined, { maximumFractionDigits: 1, minimumFractionDigits: value % 1 === 0 ? 0 : 1 });
+}
+
+function fmtMetricValue(value) {
+  if (metric === 'pct') return fmtShare(value);
+  if (metric === 'points') return fmtPoints(value);
+  if (value > 0) return Number(value) % 1 === 0 ? String(Math.round(value)) : round1(value).toFixed(1).replace(/\.0$/, '');
+  return '--';
+}
+
+function axisMetricLabel(value) {
+  if (metric === 'pct') return round1(value).toFixed(0) + '%';
+  if (metric === 'points') return round1(value).toFixed(value >= 10 ? 0 : 1).replace(/\.0$/, '');
+  return value >= 10 ? String(Math.round(value)) : round1(value).toFixed(1).replace(/\.0$/, '');
+}
+
+function colorFor(index) {
+  return PALETTE[index % PALETTE.length];
 }
 
 function hc(value, maxValue) {
@@ -282,23 +343,30 @@ function hc(value, maxValue) {
   return 'rgba(249,115,22,' + (0.7 + tone * 0.3) + ')';
 }
 
+function metricValue(raw, teamMonth) {
+  if (metric === 'units') return raw.u || 0;
+  if (metric === 'points') return round1(raw.p || 0);
+  return teamMonth.u ? round1((raw.u / teamMonth.u) * 100) : 0;
+}
+
+function teamMetricValue(teamMonth) {
+  if (metric === 'units') return teamMonth.u || 0;
+  if (metric === 'points') return round1(teamMonth.p || 0);
+  return teamMonth.u ? 100 : 0;
+}
+
 function gv(tech, year, month) {
   var raw = monthData(tech, year, month);
-  if (metric === 'units') return raw.u;
-  if (metric === 'points') return raw.p;
   var teamMonth = scopedTeamMonth(year, month);
-  return teamMonth.u ? Math.round((raw.u / teamMonth.u) * 1000) / 10 : 0;
+  return metricValue(raw, teamMonth);
 }
 
 function gtv(year, month) {
-  var totals = scopedTeamMonth(year, month);
-  return metric === 'points' ? totals.p : totals.u;
+  return teamMetricValue(scopedTeamMonth(year, month));
 }
 
 function fv(value) {
-  if (metric === 'pct') return fmtShare(value);
-  if (metric === 'points') return fmtPoints(value);
-  return value > 0 ? String(value) : '--';
+  return fmtMetricValue(value);
 }
 
 function mxT(tech) {
@@ -340,6 +408,8 @@ function selectionSummary() {
 }
 
 function syncControls() {
+  document.getElementById('bVT').className = 'btn' + (viewMode === 'table' ? ' on' : '');
+  document.getElementById('bVC').className = 'btn' + (viewMode === 'chart' ? ' on' : '');
   document.getElementById('bU').className = 'btn' + (metric === 'units' ? ' on' : '');
   document.getElementById('bP').className = 'btn' + (metric === 'points' ? ' on' : '');
   document.getElementById('bS').className = 'btn' + (metric === 'pct' ? ' on' : '');
@@ -354,7 +424,7 @@ function updateSummary() {
   document.getElementById('st').textContent = summary.count;
   document.getElementById('sa').textContent = summary.active;
   document.getElementById('techScopePill').textContent = yearLabel();
-  document.getElementById('techScopeSub').textContent = (scope === 'active' ? 'Active roster' : 'All roster') + ' · ' + metricLabel();
+  document.getElementById('techScopeSub').textContent = (scope === 'active' ? 'Active roster' : 'All roster') + ' - ' + metricLabel() + ' - ' + viewLabel();
 }
 
 function cardStats(totals) {
@@ -379,16 +449,27 @@ function cardStats(totals) {
   ];
 }
 
+function yearMetricForTech(tech, year) {
+  var raw = { u: 0, p: 0 };
+  D.months.forEach(function(month) {
+    var monthRaw = monthData(tech, year, month);
+    raw.u += monthRaw.u || 0;
+    raw.p += monthRaw.p || 0;
+  });
+  raw.p = round1(raw.p);
+  return metric === 'pct'
+    ? (scopedTeamYear(year).u ? round1((raw.u / scopedTeamYear(year).u) * 100) : 0)
+    : (metric === 'points' ? raw.p : raw.u);
+}
+
 function sparkValues(tech) {
   if (selY === 'all') {
     return D.years.map(function(year) {
-      return D.months.reduce(function(sum, month) {
-        return sum + (monthData(tech, year, month).u || 0);
-      }, 0);
+      return yearMetricForTech(tech, year);
     });
   }
   return D.months.map(function(month) {
-    return monthData(tech, selY, month).u || 0;
+    return gv(tech, selY, month);
   });
 }
 
@@ -405,8 +486,7 @@ function buildScs() {
     card.className = 'sc' + (tech === selT ? ' on' : '');
     card.onclick = function() {
       selT = tech;
-      buildScs();
-      buildInd();
+      render();
     };
 
     var sparkHtml = spark.map(function(value) {
@@ -415,7 +495,7 @@ function buildScs() {
 
     card.innerHTML =
       '<div class="scn">' + tech + '</div>' +
-      '<div class="scs2 ' + (totals.s === 'Active' ? 'a' : 'i') + '">' + totals.s + ' · ' + shortYearLabel() + '</div>' +
+      '<div class="scs2 ' + (totals.s === 'Active' ? 'a' : 'i') + '">' + totals.s + ' - ' + shortYearLabel() + '</div>' +
       '<div class="scst">' +
         stats.map(function(item) {
           return '<div><div class="sv">' + item.value + '</div><div class="sl">' + item.label + '</div></div>';
@@ -496,7 +576,7 @@ function buildTeam() {
   var maxValue = mxTm();
 
   document.getElementById('tpill').textContent = metricLabel();
-  document.getElementById('tsub').textContent = shortYearLabel() + ' · ' + (scope === 'active' ? 'active roster' : 'all roster');
+  document.getElementById('tsub').textContent = shortYearLabel() + ' - ' + (scope === 'active' ? 'active roster' : 'all roster');
 
   var html = '<thead><tr><th class="L">Period</th>';
   techs.forEach(function(tech) {
@@ -538,6 +618,224 @@ function buildTeam() {
   tips(table);
 }
 
+function periodsForView() {
+  var periods = [];
+  visibleYears().forEach(function(year) {
+    D.months.forEach(function(month) {
+      var team = scopedTeamMonth(year, month);
+      if (selY === 'all' && team.u === 0 && team.p === 0) return;
+      periods.push({
+        year: year,
+        month: month,
+        label: selY === 'all' ? month + ' ' + year.slice(2) : month,
+        fullLabel: month + ' ' + year,
+        team: team
+      });
+    });
+  });
+  return periods;
+}
+
+function contributorsForPeriod(period) {
+  return vt().reduce(function(count, tech) {
+    var raw = monthData(tech, period.year, period.month);
+    return count + ((raw.u > 0 || raw.p > 0) ? 1 : 0);
+  }, 0);
+}
+
+function seriesForTech(tech, periods) {
+  return periods.map(function(period) {
+    if (period.team.u === 0 && period.team.p === 0) return null;
+    return metricValue(monthData(tech, period.year, period.month), period.team);
+  });
+}
+
+function averageSeries(periods) {
+  return periods.map(function(period) {
+    if (period.team.u === 0 && period.team.p === 0) return null;
+    var contributors = contributorsForPeriod(period);
+    if (!contributors) return null;
+    if (metric === 'pct') return round1(100 / contributors);
+    return round1(teamMetricValue(period.team) / contributors);
+  });
+}
+
+function restOfTeamSeries(periods) {
+  return periods.map(function(period) {
+    if (period.team.u === 0 && period.team.p === 0) return null;
+    var selected = metricValue(monthData(selT, period.year, period.month), period.team);
+    if (metric === 'pct') return period.team.u ? round1(100 - selected) : 0;
+    return round1(teamMetricValue(period.team) - selected);
+  });
+}
+
+function teamSeries(periods) {
+  return periods.map(function(period) {
+    if (period.team.u === 0 && period.team.p === 0) return null;
+    return teamMetricValue(period.team);
+  });
+}
+
+function renderLineChart(hostId, config) {
+  var host = document.getElementById(hostId);
+  var points = config.points || [];
+  var series = (config.series || []).filter(function(line) {
+    return line.values && line.values.length === points.length;
+  });
+
+  if (!points.length || !series.length) {
+    host.innerHTML = '<div class="chart-empty">No chart data available for this filter.</div>';
+    return;
+  }
+
+  var activeSeries = series.filter(function(line) {
+    return line.values.some(function(value) { return value !== null && value !== undefined; });
+  });
+  if (!activeSeries.length) activeSeries = series.slice(0, 1);
+
+  var width = 960;
+  var height = 320;
+  var left = 56;
+  var right = 18;
+  var top = 18;
+  var bottom = 52;
+  var plotWidth = width - left - right;
+  var plotHeight = height - top - bottom;
+
+  var values = [];
+  activeSeries.forEach(function(line) {
+    line.values.forEach(function(value) {
+      if (value !== null && value !== undefined) values.push(Number(value) || 0);
+    });
+  });
+
+  var minValue = typeof config.min === 'number' ? config.min : 0;
+  var maxValue = Math.max.apply(null, values.concat([1]));
+  if (typeof config.max === 'number') maxValue = Math.max(maxValue, config.max);
+  if (maxValue <= minValue) maxValue = minValue + 1;
+
+  function x(index) {
+    if (points.length === 1) return left + plotWidth / 2;
+    return left + (index * plotWidth) / (points.length - 1);
+  }
+
+  function y(value) {
+    return top + ((maxValue - value) / (maxValue - minValue)) * plotHeight;
+  }
+
+  var grid = '';
+  for (var i = 0; i <= 4; i += 1) {
+    var gy = top + (plotHeight * i) / 4;
+    var tickValue = maxValue - ((maxValue - minValue) * i) / 4;
+    grid += '<line class="axis-grid" x1="' + left + '" y1="' + gy + '" x2="' + (width - right) + '" y2="' + gy + '"></line>';
+    grid += '<text class="axis-text" x="' + (left - 10) + '" y="' + (gy + 4) + '" text-anchor="end">' + axisMetricLabel(tickValue) + '</text>';
+  }
+  grid += '<line class="axis-base" x1="' + left + '" y1="' + (height - bottom) + '" x2="' + (width - right) + '" y2="' + (height - bottom) + '"></line>';
+
+  var labelStride = Math.max(1, Math.ceil(points.length / 8));
+  var xLabels = '';
+  points.forEach(function(point, index) {
+    if (index % labelStride !== 0 && index !== points.length - 1) return;
+    xLabels += '<text class="axis-text" x="' + x(index) + '" y="' + (height - 20) + '" text-anchor="middle">' + escapeHtml(point.label) + '</text>';
+  });
+
+  var drawn = '';
+  activeSeries.forEach(function(line) {
+    var path = '';
+    line.values.forEach(function(value, index) {
+      if (value === null || value === undefined) {
+        path += ' ';
+        return;
+      }
+      var prev = index > 0 ? line.values[index - 1] : null;
+      path += ((index === 0 || prev === null || prev === undefined) ? 'M' : 'L') + x(index) + ' ' + y(value) + ' ';
+    });
+
+    drawn += '<path d="' + path + '" fill="none" stroke="' + line.color + '" stroke-width="' + (line.bold ? 3.6 : 2.4) + '" stroke-linecap="round" stroke-linejoin="round"></path>';
+
+    line.values.forEach(function(value, index) {
+      if (value === null || value === undefined) return;
+      drawn += '<circle cx="' + x(index) + '" cy="' + y(value) + '" r="' + (line.bold ? 4.5 : 3.2) + '" fill="' + line.color + '"><title>' +
+        escapeHtml(line.name) + '\n' + escapeHtml(points[index].fullLabel) + '\n' + escapeHtml(fmtMetricValue(value)) +
+        '</title></circle>';
+    });
+  });
+
+  var legend = activeSeries.map(function(line) {
+    var latest = null;
+    for (var li = line.values.length - 1; li >= 0; li -= 1) {
+      if (line.values[li] !== null && line.values[li] !== undefined) {
+        latest = line.values[li];
+        break;
+      }
+    }
+    return '<div class="chart-item"><span class="sw" style="background:' + line.color + '"></span><span>' + escapeHtml(line.name) + '</span><strong>' + escapeHtml(fmtMetricValue(latest)) + '</strong></div>';
+  }).join('');
+
+  var note = '<div class="chart-note"><span>' + escapeHtml(config.noteLeft || '') + '</span><span>' + escapeHtml(config.noteRight || '') + '</span></div>';
+
+  host.innerHTML =
+    '<div class="chart-stage">' +
+      '<svg class="chart-svg" viewBox="0 0 ' + width + ' ' + height + '" role="img" aria-label="' + escapeHtml(config.aria || 'Performance trend chart') + '">' +
+        grid + drawn + xLabels +
+      '</svg>' +
+    '</div>' +
+    note +
+    '<div class="chart-legend">' + legend + '</div>';
+}
+
+function buildCharts() {
+  var periods = periodsForView();
+  var techs = vt();
+
+  document.getElementById('cpill1').textContent = metricLabel();
+  document.getElementById('cpill2').textContent = metricLabel();
+  document.getElementById('cpill3').textContent = metricLabel();
+
+  document.getElementById('csub1').textContent = selT + ' versus the period average for ' + shortYearLabel();
+  document.getElementById('csub2').textContent = 'Selected technician, rest of team, and total team trend';
+  document.getElementById('csub3').textContent = shortYearLabel() + ' - visible technicians trending against one another';
+
+  renderLineChart('chart1', {
+    points: periods,
+    series: [
+      { name: selT, values: seriesForTech(selT, periods), color: colorFor(0), bold: true },
+      { name: metric === 'pct' ? 'Average share' : 'Average technician', values: averageSeries(periods), color: colorFor(4) }
+    ],
+    min: 0,
+    max: metric === 'pct' ? 100 : null,
+    noteLeft: shortYearLabel() + ' - ' + metricLabel(),
+    noteRight: 'Selected technician focus',
+    aria: 'Selected technician trend chart'
+  });
+
+  renderLineChart('chart2', {
+    points: periods,
+    series: [
+      { name: selT, values: seriesForTech(selT, periods), color: colorFor(0), bold: true },
+      { name: metric === 'pct' ? 'Remaining share' : 'Rest of team', values: restOfTeamSeries(periods), color: colorFor(2) },
+      { name: 'Team total', values: teamSeries(periods), color: colorFor(1) }
+    ],
+    min: 0,
+    max: metric === 'pct' ? 100 : null,
+    noteLeft: 'Individual versus combined',
+    noteRight: scope === 'active' ? 'Active roster only' : 'Full roster',
+    aria: 'Selected versus combined performance chart'
+  });
+
+  renderLineChart('chart3', {
+    points: periods,
+    series: techs.map(function(tech, index) {
+      return { name: tech, values: seriesForTech(tech, periods), color: colorFor(index), bold: tech === selT };
+    }),
+    min: 0,
+    max: metric === 'pct' ? 100 : null,
+    noteLeft: 'Roster comparison',
+    noteRight: techs.length + ' technicians shown',
+    aria: 'Roster comparison chart'
+  });
+}
+
 function tips(container) {
   var tip = document.getElementById('tip');
   var cells = container.querySelectorAll('[data-tip]');
@@ -557,6 +855,11 @@ function tips(container) {
       };
     })(cells[i]);
   }
+}
+
+function setView(nextView) {
+  viewMode = nextView;
+  render();
 }
 
 function setM(nextMetric) {
@@ -588,10 +891,14 @@ function buildYB() {
   for (var i = 0; i < D.years.length; i += 1) addButton(D.years[i], D.years[i]);
 }
 
+function syncViewShells() {
+  document.getElementById('tableView').className = 'view-shell' + (viewMode === 'table' ? '' : ' hidden');
+  document.getElementById('chartView').className = 'view-shell' + (viewMode === 'chart' ? '' : ' hidden');
+}
+
 function render() {
   syncControls();
   buildYB();
-  updateSummary();
 
   if (!vt().length) {
     showEmpty('No technician data was found for the current year and roster filters.');
@@ -600,9 +907,17 @@ function render() {
 
   hideEmpty();
   ensureSelectedTech();
+  updateSummary();
   buildScs();
-  buildInd();
-  buildTeam();
+  syncViewShells();
+  document.getElementById('tip').style.display = 'none';
+
+  if (viewMode === 'table') {
+    buildInd();
+    buildTeam();
+  } else {
+    buildCharts();
+  }
 }
 
 async function init() {
