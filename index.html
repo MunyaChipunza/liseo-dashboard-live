@@ -78,35 +78,568 @@ table.tm td.ttl{border-left:1px solid var(--border);font-weight:500}
 <div class="ctrls"><span class="clbl">Metric</span><div class="bg"><button class="btn on" id="bU" onclick="setM('units')">Units</button><button class="btn" id="bP" onclick="setM('points')">Points</button><button class="btn" id="bS" onclick="setM('pct')">% Share</button></div><div class="sep"></div><span class="clbl">Year</span><div class="bg" id="ybtns"></div><div class="sep"></div><span class="clbl">Roster</span><div class="bg"><button class="btn on" id="bA" onclick="setSc('all')">All</button><button class="btn" id="bAO" onclick="setSc('active')">Active Only</button></div></div>
 <div class="main">
 <div id="empty"></div>
-<div class="panel"><div class="stitle"><h2>Technicians</h2><span class="pill po">ALL-TIME</span><span class="ssub">Click a card to drill in</span></div><div class="scs" id="scs"></div></div>
+<div class="panel"><div class="stitle"><h2>Technicians</h2><span class="pill po" id="techScopePill">ALL YEARS</span><span class="ssub" id="techScopeSub">Click a card to drill in</span></div><div class="scs" id="scs"></div></div>
 <div class="panel"><div class="stitle"><h2 id="ititle">INDIVIDUAL</h2><span class="pill po" id="ipill">UNITS</span><span class="ssub">Monthly output &middot; hover for detail</span></div><div class="hmw"><div class="hmsc"><table class="hm" id="ihm"></table></div><div class="leg" id="leg"></div></div></div>
 <div class="panel"><div class="stitle"><h2>Team Comparison</h2><span class="pill pb" id="tpill">UNITS</span><span class="ssub" id="tsub">All years &middot; month by month</span></div><div class="tmw"><div class="tmsc"><table class="tm" id="ttbl"></table></div></div></div>
 </div>
 <div id="tip"></div>
 <script>
-const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const ORDER=['Innocent Mhora','Alferis Tembo','Barend Nel','Antonio Chauque','James Russell','Talent Mutanda','Kuda Bope','Exavier Mucherera'];
-let D,metric='units',selY='all',selT='',scope='all';
-function setLoadState(t,w){document.getElementById('loadState').textContent=t;document.getElementById('loadDot').className=w?'dot warn':'dot'}
-function showEmpty(t){document.getElementById('empty').style.display='block';document.getElementById('empty').textContent=t;document.querySelectorAll('.panel').forEach(function(p){p.style.display='none'})}
-function hideEmpty(){document.getElementById('empty').style.display='none';document.querySelectorAll('.panel').forEach(function(p){p.style.display=''})}
-function agg(rows){var tSet=[],ySet=[];rows.forEach(function(r){if(tSet.indexOf(r.tech)<0)tSet.push(r.tech);if(ySet.indexOf(String(r.yr))<0)ySet.push(String(r.yr));});tSet.sort(function(a,b){var ai=ORDER.indexOf(a),bi=ORDER.indexOf(b);return(ai<0?99:ai)-(bi<0?99:bi)});ySet.sort();var data={},team={},at={};tSet.forEach(function(t){data[t]={};at[t]={u:0,p:0,s:'Inactive'};ySet.forEach(function(y){data[t][y]={};MONTHS.forEach(function(m){data[t][y][m]={u:0,p:0}})})});ySet.forEach(function(y){team[y]={};MONTHS.forEach(function(m){team[y][m]={u:0,p:0}})});rows.forEach(function(r){var t=r.tech,y=String(r.yr),m=r.mo,u=Number(r.u)||0,p=Number(r.p)||0;if(!data[t]||!data[t][y]||!data[t][y][m])return;data[t][y][m].u+=u;data[t][y][m].p+=p;if(team[y]&&team[y][m]){team[y][m].u+=u;team[y][m].p+=p}at[t].u+=u;at[t].p+=p;if(r.s)at[t].s=r.s});tSet.forEach(function(t){at[t].p=Math.round(at[t].p*10)/10;at[t].apr=at[t].u>0?Math.round(at[t].p/at[t].u*100)/100:0});return{data:data,team:team,at:at,techs:tSet,years:ySet,months:MONTHS}}
-function hc(v,mx){if(!v||v===0)return'#0d1117';var t=Math.min(v/mx,1);if(t<0.2)return'rgba(29,78,216,'+(0.2+t*2)+')';if(t<0.5)return'rgba(37,99,235,'+(0.5+t)+')';if(t<0.75)return'rgba(234,88,12,'+(0.55+t)+')';return'rgba(249,115,22,'+(0.7+t*0.3)+')'}
-function gv(t,y,m){var d=D.data[t]&&D.data[t][y]&&D.data[t][y][m];if(!d)return 0;if(metric==='units')return d.u;if(metric==='points')return d.p;var tm=D.team[y]&&D.team[y][m];return(tm&&tm.u)?Math.round(d.u/tm.u*100):0}
-function gtv(y,m){var t=D.team[y]&&D.team[y][m];return t?(metric==='points'?t.p:t.u):0}
-function fv(v){if(metric==='pct')return v>0?v+'%':'--';if(metric==='points')return v>0?v.toFixed(1):'--';return v>0?String(v):'--'}
-function mxT(t){var mx=0;D.years.forEach(function(y){D.months.forEach(function(m){var v=gv(t,y,m);if(v>mx)mx=v})});return mx||1}
-function mxTm(){var tc=vt(),ys=selY==='all'?D.years:[selY],mx=0;ys.forEach(function(y){D.months.forEach(function(m){tc.forEach(function(t){var v=gv(t,y,m);if(v>mx)mx=v})})});return mx||1}
-function vt(){return scope==='active'?D.techs.filter(function(t){return D.at[t].s==='Active'}):D.techs}
-function buildScs(){var el=document.getElementById('scs');el.innerHTML='';vt().forEach(function(t){var a=D.at[t];var sp=D.years.map(function(y){return D.months.reduce(function(s,m){return s+(D.data[t][y][m].u||0)},0)});var sm=Math.max.apply(null,sp.concat([1]));var dv=document.createElement('div');dv.className='sc'+(t===selT?' on':'');dv.onclick=function(){selT=t;buildScs();buildInd()};var spHTML=sp.map(function(v){return'<div class="spkb" style="height:'+Math.max(2,Math.round(v/sm*18))+'px"></div>'}).join('');dv.innerHTML='<div class="scn">'+t+'</div>'+'<div class="scs2 '+(a.s==='Active'?'a':'i')+'">'+a.s+'</div>'+'<div class="scst"><div><div class="sv">'+a.u+'</div><div class="sl">Units</div></div>'+'<div><div class="sv">'+a.p+'</div><div class="sl">Pts</div></div>'+'<div><div class="sv">'+a.apr+'</div><div class="sl">P/U</div></div></div>'+'<div class="spk">'+spHTML+'</div>';el.appendChild(dv)})}
-function buildInd(){var tbl=document.getElementById('ihm');document.getElementById('ititle').textContent=selT.toUpperCase();document.getElementById('ipill').textContent=metric.toUpperCase();var mx=mxT(selT),ys=selY==='all'?D.years:[selY];var h='<thead><tr><th class="L">Year</th>';D.months.forEach(function(m){h+='<th>'+m+'</th>'});h+='<th>Total</th></tr></thead><tbody>';ys.forEach(function(y){var tot=0,cells='';D.months.forEach(function(m){var v=gv(selT,y,m);var raw=(D.data[selT][y]&&D.data[selT][y][m])||{u:0,p:0};tot+=metric==='points'?raw.p:raw.u;var bg=hc(v,mx);var tu=(D.team[y]&&D.team[y][m]&&D.team[y][m].u)||0;var pct=tu>0?Math.round(raw.u/tu*100):0;cells+='<td style="background:'+bg+'" data-tip="'+selT+' | '+m+' '+y+'|Units: '+raw.u+'  Points: '+raw.p+'  Share: '+pct+'%">'+'<div class="ci"><span class="cv">'+fv(v)+'</span>'+(metric==='units'&&pct>0?'<span class="cp">'+pct+'%</span>':'')+'</div></td>'});var td=metric==='points'?tot.toFixed(1):metric==='pct'?'':tot;h+='<tr><td class="yr">'+y+'</td>'+cells+'<td class="tot">'+(td||'--')+'</td></tr>'});h+='</tbody>';tbl.innerHTML=h;var st=[0,.2,.5,.75,1],lb=['Zero','Low','Mid','High','Peak'];document.getElementById('leg').innerHTML='<span style="margin-right:7px">Heat:</span>'+st.map(function(t,i){return'<div class="ls" style="background:'+hc(t*mx||.01,mx)+'"></div><span style="margin-right:9px">'+lb[i]+'</span>'}).join('');tips(tbl)}
-function buildTeam(){var tbl=document.getElementById('ttbl');document.getElementById('tpill').textContent=metric.toUpperCase();var tc=vt(),ys=selY==='all'?D.years:[selY],mx=mxTm();document.getElementById('tsub').textContent=selY==='all'?'All years - month by month':selY+' - full year';var h='<thead><tr><th class="L">Period</th>';tc.forEach(function(t){h+='<th>'+t.split(' ')[0]+'</th>'});h+='<th>Team</th></tr></thead><tbody>';ys.forEach(function(y){if(selY==='all')h+='<tr class="yrs"><td colspan="'+(tc.length+2)+'"></td></tr>';D.months.forEach(function(m){var tv=gtv(y,m);if(tv===0&&selY==='all')return;h+='<tr><td class="per">'+y+' '+m+'</td>';tc.forEach(function(t){var v=gv(t,y,m);var raw=(D.data[t][y]&&D.data[t][y][m])||{u:0,p:0};var tu=(D.team[y]&&D.team[y][m]&&D.team[y][m].u)||0;var pct=tu>0?Math.round(raw.u/tu*100):0;var bg=hc(v,mx);h+='<td style="background:'+bg+';color:'+(v>0?'#e2e8f0':'#2d3748')+'" data-tip="'+t+' | '+m+' '+y+'|Units: '+raw.u+'  Points: '+raw.p+'  Share: '+pct+'%">'+fv(v)+'</td>'});var tv2=metric==='points'?((D.team[y][m]&&D.team[y][m].p)||0):((D.team[y][m]&&D.team[y][m].u)||0);h+='<td class="ttl" style="color:'+(tv2>0?'#e2e8f0':'#334155')+'">'+(tv2>0?(metric==='points'?tv2.toFixed(1):tv2):'--')+'</td></tr>'})});h+='</tbody>';tbl.innerHTML=h;tips(tbl)}
-function tips(c){var tip=document.getElementById('tip');var els=c.querySelectorAll('[data-tip]');for(var i=0;i<els.length;i++){(function(el){el.onmouseenter=function(){var p=el.dataset.tip.split('|');tip.innerHTML='<b>'+p[0]+'</b>'+p[1];tip.style.display='block'};el.onmousemove=function(e){tip.style.left=(e.clientX+14)+'px';tip.style.top=(e.clientY-10)+'px'};el.onmouseleave=function(){tip.style.display='none'}})(els[i])}}
-function setM(m){metric=m;var ids=['bU','bP','bS'],vals=['units','points','pct'];for(var i=0;i<ids.length;i++)document.getElementById(ids[i]).className='btn'+(vals[i]===m?' on':'');buildInd();buildTeam()}
-function setSc(s){scope=s;document.getElementById('bA').className='btn'+(s==='all'?' on':'');document.getElementById('bAO').className='btn'+(s==='active'?' on':'');if(s==='active'&&D.at[selT]&&D.at[selT].s!=='Active'){for(var i=0;i<D.techs.length;i++){if(D.at[D.techs[i]].s==='Active'){selT=D.techs[i];break}}}render()}
-function buildYB(){var w=document.getElementById('ybtns');w.innerHTML='';function mk(lbl,val){var b=document.createElement('button');b.className='btn'+(selY===val?' on':'');b.textContent=lbl;b.onclick=function(){selY=val;buildYB();buildInd();buildTeam()};w.appendChild(b)}mk('All','all');for(var i=0;i<D.years.length;i++)mk(D.years[i],D.years[i])}
-function render(){buildYB();buildScs();buildInd();buildTeam()}
-async function init(){try{var res=await fetch('./dashboard_data.json?ts='+Date.now(),{cache:'no-store'});if(!res.ok)throw new Error('HTTP '+res.status);var payload=await res.json();var rows=Array.isArray(payload.rows)?payload.rows:[];var meta=payload.meta||{};document.getElementById('sourceName').textContent=meta.workbookName||'Liseo Production Master Sheet';document.getElementById('updatedAt').textContent=meta.generatedAtLabel||'Dashboard data ready';if(!rows.length){setLoadState('No dashboard rows found',true);showEmpty('No production rows were found in the workbook export yet.');return}hideEmpty();D=agg(rows);if(!D.techs.length){setLoadState('No technician rows found',true);showEmpty('The workbook loaded, but no technician records were available for the dashboard.');return}selT=D.techs.indexOf('Innocent Mhora')>=0?'Innocent Mhora':D.techs[0];document.getElementById('su').textContent=D.techs.reduce(function(s,t){return s+D.at[t].u},0).toLocaleString();document.getElementById('sp').textContent=D.techs.reduce(function(s,t){return s+D.at[t].p},0).toLocaleString();document.getElementById('st').textContent=D.techs.length;document.getElementById('sa').textContent=D.techs.filter(function(t){return D.at[t].s==='Active'}).length;setLoadState('Data loaded',false);render()}catch(error){console.error(error);setLoadState('Load failed',true);document.getElementById('updatedAt').textContent='Unable to read dashboard_data.json';showEmpty('The dashboard could not load its JSON data. Regenerate dashboard_data.json or run the local preview server.')}}
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const ORDER = ['Innocent Mhora', 'Alferis Tembo', 'Barend Nel', 'Antonio Chauque', 'James Russell', 'Talent Mutanda', 'Kuda Bope', 'Exavier Mucherera'];
+
+let D;
+let metric = 'units';
+let selY = 'all';
+let selT = '';
+let scope = 'all';
+
+function setLoadState(text, warn) {
+  document.getElementById('loadState').textContent = text;
+  document.getElementById('loadDot').className = warn ? 'dot warn' : 'dot';
+}
+
+function showEmpty(text) {
+  document.getElementById('empty').style.display = 'block';
+  document.getElementById('empty').textContent = text;
+  document.querySelectorAll('.panel').forEach(function(panel) {
+    panel.style.display = 'none';
+  });
+}
+
+function hideEmpty() {
+  document.getElementById('empty').style.display = 'none';
+  document.querySelectorAll('.panel').forEach(function(panel) {
+    panel.style.display = '';
+  });
+}
+
+function agg(rows) {
+  var techs = [];
+  var years = [];
+
+  rows.forEach(function(row) {
+    var tech = row.tech;
+    var year = String(row.yr);
+    if (techs.indexOf(tech) < 0) techs.push(tech);
+    if (years.indexOf(year) < 0) years.push(year);
+  });
+
+  techs.sort(function(a, b) {
+    var ai = ORDER.indexOf(a);
+    var bi = ORDER.indexOf(b);
+    return (ai < 0 ? 99 : ai) - (bi < 0 ? 99 : bi);
+  });
+  years.sort();
+
+  var data = {};
+  var at = {};
+
+  techs.forEach(function(tech) {
+    data[tech] = {};
+    at[tech] = { u: 0, p: 0, s: 'Inactive' };
+    years.forEach(function(year) {
+      data[tech][year] = {};
+      MONTHS.forEach(function(month) {
+        data[tech][year][month] = { u: 0, p: 0 };
+      });
+    });
+  });
+
+  rows.forEach(function(row) {
+    var tech = row.tech;
+    var year = String(row.yr);
+    var month = row.mo;
+    var units = Number(row.u) || 0;
+    var points = Number(row.p) || 0;
+    if (!data[tech] || !data[tech][year] || !data[tech][year][month]) return;
+
+    data[tech][year][month].u += units;
+    data[tech][year][month].p += points;
+    at[tech].u += units;
+    at[tech].p += points;
+    if (row.s) at[tech].s = row.s;
+  });
+
+  techs.forEach(function(tech) {
+    at[tech].p = Math.round(at[tech].p * 10) / 10;
+    at[tech].apr = at[tech].u > 0 ? Math.round((at[tech].p / at[tech].u) * 100) / 100 : 0;
+  });
+
+  return { data: data, at: at, techs: techs, years: years, months: MONTHS };
+}
+
+function visibleYears() {
+  return selY === 'all' ? D.years.slice() : [selY];
+}
+
+function rosterTechs() {
+  return scope === 'active'
+    ? D.techs.filter(function(tech) { return D.at[tech].s === 'Active'; })
+    : D.techs.slice();
+}
+
+function monthData(tech, year, month) {
+  return (D.data[tech] && D.data[tech][year] && D.data[tech][year][month]) || { u: 0, p: 0 };
+}
+
+function scopedTeamMonth(year, month) {
+  var totals = { u: 0, p: 0 };
+  rosterTechs().forEach(function(tech) {
+    var raw = monthData(tech, year, month);
+    totals.u += raw.u || 0;
+    totals.p += raw.p || 0;
+  });
+  return totals;
+}
+
+function scopedTeamYear(year) {
+  var totals = { u: 0, p: 0 };
+  D.months.forEach(function(month) {
+    var raw = scopedTeamMonth(year, month);
+    totals.u += raw.u;
+    totals.p += raw.p;
+  });
+  totals.p = Math.round(totals.p * 10) / 10;
+  return totals;
+}
+
+function scopedSelectionUnits() {
+  return visibleYears().reduce(function(sum, year) {
+    return sum + scopedTeamYear(year).u;
+  }, 0);
+}
+
+function scopedTechTotals(tech) {
+  var totals = { u: 0, p: 0, s: D.at[tech].s };
+
+  visibleYears().forEach(function(year) {
+    D.months.forEach(function(month) {
+      var raw = monthData(tech, year, month);
+      totals.u += raw.u || 0;
+      totals.p += raw.p || 0;
+    });
+  });
+
+  totals.p = Math.round(totals.p * 10) / 10;
+  totals.apr = totals.u > 0 ? Math.round((totals.p / totals.u) * 100) / 100 : 0;
+  var selectionUnits = scopedSelectionUnits();
+  totals.share = selectionUnits > 0 ? Math.round((totals.u / selectionUnits) * 1000) / 10 : 0;
+  return totals;
+}
+
+function hasScopeData(tech) {
+  var totals = scopedTechTotals(tech);
+  return totals.u > 0 || totals.p > 0;
+}
+
+function vt() {
+  return rosterTechs().filter(hasScopeData);
+}
+
+function ensureSelectedTech() {
+  var techs = vt();
+  if (!techs.length) {
+    selT = '';
+    return;
+  }
+  if (!selT || techs.indexOf(selT) < 0) {
+    selT = techs.indexOf('Innocent Mhora') >= 0 ? 'Innocent Mhora' : techs[0];
+  }
+}
+
+function metricLabel() {
+  if (metric === 'points') return 'POINTS';
+  if (metric === 'pct') return '% SHARE';
+  return 'UNITS';
+}
+
+function yearLabel() {
+  return selY === 'all' ? 'ALL YEARS' : selY;
+}
+
+function shortYearLabel() {
+  return selY === 'all' ? 'All years' : selY;
+}
+
+function fmtShare(value) {
+  return value > 0 ? (Number(value).toFixed(1).replace(/\.0$/, '') + '%') : '--';
+}
+
+function fmtPoints(value) {
+  return value > 0 ? Number(value).toFixed(1).replace(/\.0$/, '') : '--';
+}
+
+function fmtSummaryPoints(value) {
+  return Number(value).toLocaleString(undefined, { maximumFractionDigits: 1, minimumFractionDigits: value % 1 === 0 ? 0 : 1 });
+}
+
+function hc(value, maxValue) {
+  if (!value || value === 0) return '#0d1117';
+  var tone = Math.min(value / maxValue, 1);
+  if (tone < 0.2) return 'rgba(29,78,216,' + (0.2 + tone * 2) + ')';
+  if (tone < 0.5) return 'rgba(37,99,235,' + (0.5 + tone) + ')';
+  if (tone < 0.75) return 'rgba(234,88,12,' + (0.55 + tone) + ')';
+  return 'rgba(249,115,22,' + (0.7 + tone * 0.3) + ')';
+}
+
+function gv(tech, year, month) {
+  var raw = monthData(tech, year, month);
+  if (metric === 'units') return raw.u;
+  if (metric === 'points') return raw.p;
+  var teamMonth = scopedTeamMonth(year, month);
+  return teamMonth.u ? Math.round((raw.u / teamMonth.u) * 1000) / 10 : 0;
+}
+
+function gtv(year, month) {
+  var totals = scopedTeamMonth(year, month);
+  return metric === 'points' ? totals.p : totals.u;
+}
+
+function fv(value) {
+  if (metric === 'pct') return fmtShare(value);
+  if (metric === 'points') return fmtPoints(value);
+  return value > 0 ? String(value) : '--';
+}
+
+function mxT(tech) {
+  var maxValue = 0;
+  visibleYears().forEach(function(year) {
+    D.months.forEach(function(month) {
+      var value = gv(tech, year, month);
+      if (value > maxValue) maxValue = value;
+    });
+  });
+  return maxValue || 1;
+}
+
+function mxTm() {
+  var maxValue = 0;
+  var techs = vt();
+  visibleYears().forEach(function(year) {
+    D.months.forEach(function(month) {
+      techs.forEach(function(tech) {
+        var value = gv(tech, year, month);
+        if (value > maxValue) maxValue = value;
+      });
+    });
+  });
+  return maxValue || 1;
+}
+
+function selectionSummary() {
+  var summary = { u: 0, p: 0, count: 0, active: 0 };
+  vt().forEach(function(tech) {
+    var totals = scopedTechTotals(tech);
+    summary.u += totals.u;
+    summary.p += totals.p;
+    summary.count += 1;
+    if (totals.s === 'Active') summary.active += 1;
+  });
+  summary.p = Math.round(summary.p * 10) / 10;
+  return summary;
+}
+
+function syncControls() {
+  document.getElementById('bU').className = 'btn' + (metric === 'units' ? ' on' : '');
+  document.getElementById('bP').className = 'btn' + (metric === 'points' ? ' on' : '');
+  document.getElementById('bS').className = 'btn' + (metric === 'pct' ? ' on' : '');
+  document.getElementById('bA').className = 'btn' + (scope === 'all' ? ' on' : '');
+  document.getElementById('bAO').className = 'btn' + (scope === 'active' ? ' on' : '');
+}
+
+function updateSummary() {
+  var summary = selectionSummary();
+  document.getElementById('su').textContent = summary.u.toLocaleString();
+  document.getElementById('sp').textContent = fmtSummaryPoints(summary.p);
+  document.getElementById('st').textContent = summary.count;
+  document.getElementById('sa').textContent = summary.active;
+  document.getElementById('techScopePill').textContent = yearLabel();
+  document.getElementById('techScopeSub').textContent = (scope === 'active' ? 'Active roster' : 'All roster') + ' · ' + metricLabel();
+}
+
+function cardStats(totals) {
+  if (metric === 'points') {
+    return [
+      { value: fmtPoints(totals.p), label: 'Pts' },
+      { value: totals.u > 0 ? String(totals.u) : '--', label: 'Units' },
+      { value: totals.apr > 0 ? totals.apr.toFixed(2).replace(/\.00$/, '') : '--', label: 'P/U' }
+    ];
+  }
+  if (metric === 'pct') {
+    return [
+      { value: fmtShare(totals.share), label: 'Share' },
+      { value: totals.u > 0 ? String(totals.u) : '--', label: 'Units' },
+      { value: fmtPoints(totals.p), label: 'Pts' }
+    ];
+  }
+  return [
+    { value: totals.u > 0 ? String(totals.u) : '--', label: 'Units' },
+    { value: fmtPoints(totals.p), label: 'Pts' },
+    { value: totals.apr > 0 ? totals.apr.toFixed(2).replace(/\.00$/, '') : '--', label: 'P/U' }
+  ];
+}
+
+function sparkValues(tech) {
+  if (selY === 'all') {
+    return D.years.map(function(year) {
+      return D.months.reduce(function(sum, month) {
+        return sum + (monthData(tech, year, month).u || 0);
+      }, 0);
+    });
+  }
+  return D.months.map(function(month) {
+    return monthData(tech, selY, month).u || 0;
+  });
+}
+
+function buildScs() {
+  var host = document.getElementById('scs');
+  host.innerHTML = '';
+
+  vt().forEach(function(tech) {
+    var totals = scopedTechTotals(tech);
+    var spark = sparkValues(tech);
+    var sparkMax = Math.max.apply(null, spark.concat([1]));
+    var stats = cardStats(totals);
+    var card = document.createElement('div');
+    card.className = 'sc' + (tech === selT ? ' on' : '');
+    card.onclick = function() {
+      selT = tech;
+      buildScs();
+      buildInd();
+    };
+
+    var sparkHtml = spark.map(function(value) {
+      return '<div class="spkb" style="height:' + Math.max(2, Math.round(value / sparkMax * 18)) + 'px"></div>';
+    }).join('');
+
+    card.innerHTML =
+      '<div class="scn">' + tech + '</div>' +
+      '<div class="scs2 ' + (totals.s === 'Active' ? 'a' : 'i') + '">' + totals.s + ' · ' + shortYearLabel() + '</div>' +
+      '<div class="scst">' +
+        stats.map(function(item) {
+          return '<div><div class="sv">' + item.value + '</div><div class="sl">' + item.label + '</div></div>';
+        }).join('') +
+      '</div>' +
+      '<div class="spk">' + sparkHtml + '</div>';
+    host.appendChild(card);
+  });
+}
+
+function buildInd() {
+  var table = document.getElementById('ihm');
+  if (!selT) {
+    table.innerHTML = '';
+    return;
+  }
+
+  document.getElementById('ititle').textContent = selT.toUpperCase();
+  document.getElementById('ipill').textContent = metricLabel();
+
+  var maxValue = mxT(selT);
+  var years = visibleYears();
+  var html = '<thead><tr><th class="L">Year</th>';
+
+  D.months.forEach(function(month) {
+    html += '<th>' + month + '</th>';
+  });
+  html += '<th>Total</th></tr></thead><tbody>';
+
+  years.forEach(function(year) {
+    var yearUnits = 0;
+    var yearPoints = 0;
+    var cells = '';
+
+    D.months.forEach(function(month) {
+      var raw = monthData(selT, year, month);
+      var value = gv(selT, year, month);
+      var teamMonth = scopedTeamMonth(year, month);
+      var share = teamMonth.u > 0 ? Math.round((raw.u / teamMonth.u) * 1000) / 10 : 0;
+      var bg = hc(value, maxValue);
+
+      yearUnits += raw.u;
+      yearPoints += raw.p;
+
+      cells += '<td style="background:' + bg + '" data-tip="' + selT + ' | ' + month + ' ' + year + '|Units: ' + raw.u + '  Points: ' + fmtPoints(raw.p) + '  Share: ' + fmtShare(share) + '">' +
+        '<div class="ci"><span class="cv">' + fv(value) + '</span>' + (metric === 'units' && share > 0 ? '<span class="cp">' + fmtShare(share) + '</span>' : '') + '</div></td>';
+    });
+
+    var totalDisplay = '--';
+    if (metric === 'points') {
+      totalDisplay = yearPoints > 0 ? fmtPoints(yearPoints) : '--';
+    } else if (metric === 'pct') {
+      var teamYear = scopedTeamYear(year);
+      totalDisplay = teamYear.u > 0 ? fmtShare((yearUnits / teamYear.u) * 100) : '--';
+    } else if (yearUnits > 0) {
+      totalDisplay = String(yearUnits);
+    }
+
+    html += '<tr><td class="yr">' + year + '</td>' + cells + '<td class="tot">' + totalDisplay + '</td></tr>';
+  });
+
+  html += '</tbody>';
+  table.innerHTML = html;
+
+  var stops = [0, 0.2, 0.5, 0.75, 1];
+  var labels = ['Zero', 'Low', 'Mid', 'High', 'Peak'];
+  document.getElementById('leg').innerHTML = '<span style="margin-right:7px">Heat:</span>' + stops.map(function(stop, index) {
+    return '<div class="ls" style="background:' + hc(stop * maxValue || 0.01, maxValue) + '"></div><span style="margin-right:9px">' + labels[index] + '</span>';
+  }).join('');
+
+  tips(table);
+}
+
+function buildTeam() {
+  var table = document.getElementById('ttbl');
+  var techs = vt();
+  var years = visibleYears();
+  var maxValue = mxTm();
+
+  document.getElementById('tpill').textContent = metricLabel();
+  document.getElementById('tsub').textContent = shortYearLabel() + ' · ' + (scope === 'active' ? 'active roster' : 'all roster');
+
+  var html = '<thead><tr><th class="L">Period</th>';
+  techs.forEach(function(tech) {
+    html += '<th>' + tech.split(' ')[0] + '</th>';
+  });
+  html += '<th>Team</th></tr></thead><tbody>';
+
+  years.forEach(function(year) {
+    if (selY === 'all') html += '<tr class="yrs"><td colspan="' + (techs.length + 2) + '"></td></tr>';
+
+    D.months.forEach(function(month) {
+      var teamMonth = scopedTeamMonth(year, month);
+      if (teamMonth.u === 0 && teamMonth.p === 0 && selY === 'all') return;
+
+      html += '<tr><td class="per">' + year + ' ' + month + '</td>';
+      techs.forEach(function(tech) {
+        var raw = monthData(tech, year, month);
+        var value = gv(tech, year, month);
+        var share = teamMonth.u > 0 ? Math.round((raw.u / teamMonth.u) * 1000) / 10 : 0;
+        var bg = hc(value, maxValue);
+        html += '<td style="background:' + bg + ';color:' + (value > 0 ? '#e2e8f0' : '#2d3748') + '" data-tip="' + tech + ' | ' + month + ' ' + year + '|Units: ' + raw.u + '  Points: ' + fmtPoints(raw.p) + '  Share: ' + fmtShare(share) + '">' + fv(value) + '</td>';
+      });
+
+      var teamDisplay = '--';
+      if (metric === 'points') {
+        teamDisplay = teamMonth.p > 0 ? fmtPoints(teamMonth.p) : '--';
+      } else if (metric === 'pct') {
+        teamDisplay = teamMonth.u > 0 ? '100%' : '--';
+      } else if (teamMonth.u > 0) {
+        teamDisplay = String(teamMonth.u);
+      }
+
+      html += '<td class="ttl" style="color:' + (teamDisplay !== '--' ? '#e2e8f0' : '#334155') + '">' + teamDisplay + '</td></tr>';
+    });
+  });
+
+  html += '</tbody>';
+  table.innerHTML = html;
+  tips(table);
+}
+
+function tips(container) {
+  var tip = document.getElementById('tip');
+  var cells = container.querySelectorAll('[data-tip]');
+  for (var i = 0; i < cells.length; i += 1) {
+    (function(cell) {
+      cell.onmouseenter = function() {
+        var parts = cell.dataset.tip.split('|');
+        tip.innerHTML = '<b>' + parts[0] + '</b>' + parts[1];
+        tip.style.display = 'block';
+      };
+      cell.onmousemove = function(event) {
+        tip.style.left = (event.clientX + 14) + 'px';
+        tip.style.top = (event.clientY - 10) + 'px';
+      };
+      cell.onmouseleave = function() {
+        tip.style.display = 'none';
+      };
+    })(cells[i]);
+  }
+}
+
+function setM(nextMetric) {
+  metric = nextMetric;
+  render();
+}
+
+function setSc(nextScope) {
+  scope = nextScope;
+  render();
+}
+
+function buildYB() {
+  var wrap = document.getElementById('ybtns');
+  wrap.innerHTML = '';
+
+  function addButton(label, value) {
+    var button = document.createElement('button');
+    button.className = 'btn' + (selY === value ? ' on' : '');
+    button.textContent = label;
+    button.onclick = function() {
+      selY = value;
+      render();
+    };
+    wrap.appendChild(button);
+  }
+
+  addButton('All', 'all');
+  for (var i = 0; i < D.years.length; i += 1) addButton(D.years[i], D.years[i]);
+}
+
+function render() {
+  syncControls();
+  buildYB();
+  updateSummary();
+
+  if (!vt().length) {
+    showEmpty('No technician data was found for the current year and roster filters.');
+    return;
+  }
+
+  hideEmpty();
+  ensureSelectedTech();
+  buildScs();
+  buildInd();
+  buildTeam();
+}
+
+async function init() {
+  try {
+    var res = await fetch('./dashboard_data.json?ts=' + Date.now(), { cache: 'no-store' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+
+    var payload = await res.json();
+    var rows = Array.isArray(payload.rows) ? payload.rows : [];
+    var meta = payload.meta || {};
+    document.getElementById('sourceName').textContent = meta.workbookName || 'Liseo Production Master Sheet';
+    document.getElementById('updatedAt').textContent = meta.generatedAtLabel || 'Dashboard data ready';
+
+    if (!rows.length) {
+      setLoadState('No dashboard rows found', true);
+      showEmpty('No production rows were found in the workbook export yet.');
+      return;
+    }
+
+    D = agg(rows);
+    if (!D.techs.length) {
+      setLoadState('No technician rows found', true);
+      showEmpty('The workbook loaded, but no technician records were available for the dashboard.');
+      return;
+    }
+
+    selT = D.techs.indexOf('Innocent Mhora') >= 0 ? 'Innocent Mhora' : D.techs[0];
+    setLoadState('Data loaded', false);
+    render();
+  } catch (error) {
+    console.error(error);
+    setLoadState('Load failed', true);
+    document.getElementById('updatedAt').textContent = 'Unable to read dashboard_data.json';
+    showEmpty('The dashboard could not load its JSON data. Regenerate dashboard_data.json or run the local preview server.');
+  }
+}
+
 init();
 </script>
 </body>

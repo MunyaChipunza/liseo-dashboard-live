@@ -23,11 +23,15 @@ def parse_args() -> argparse.Namespace:
 
 
 def find_default_workbook(bundle_dir: Path) -> Path | None:
-    parent = bundle_dir.parent
-    for pattern in ("*.xlsm", "*.xlsx"):
-        matches = sorted(parent.glob(pattern))
-        if matches:
-            return matches[0]
+    search_roots = [bundle_dir.parent]
+    if bundle_dir.parent.parent != bundle_dir.parent:
+        search_roots.append(bundle_dir.parent.parent)
+
+    for root in search_roots:
+        for pattern in ("*.xlsm", "*.xlsx"):
+            matches = sorted(root.glob(pattern))
+            if matches:
+                return matches[0]
     return None
 
 
