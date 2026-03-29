@@ -13,7 +13,7 @@ $triggerTime = (Get-Date).AddMinutes(1)
 $taskArgs = '"' + $scriptPath + '" --workbook "' + $workbookFullPath + '"'
 $action = New-ScheduledTaskAction -Execute $pythonPath -Argument $taskArgs
 $trigger = New-ScheduledTaskTrigger -Once -At $triggerTime -RepetitionInterval (New-TimeSpan -Minutes 1) -RepetitionDuration (New-TimeSpan -Days 3650)
-$settings = New-ScheduledTaskSettingsSet -StartWhenAvailable
+$settings = New-ScheduledTaskSettingsSet -StartWhenAvailable -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries
 
 Register-ScheduledTask -TaskName $TaskName -Action $action -Trigger $trigger -Settings $settings -Description "Publishes the Liseo dashboard from the local workbook every minute." -Force | Out-Null
 
