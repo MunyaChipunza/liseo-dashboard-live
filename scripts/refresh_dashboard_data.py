@@ -217,7 +217,7 @@ def onedrive_badger_headers() -> dict[str, str]:
     }
 
 
-def download_onedrive_share(url: str) -> Path:
+def download_onedrive_share(url: str) -> tuple[Path, str]:
     token = share_token(url)
     headers = onedrive_badger_headers()
     metadata = request_json(f"https://api.onedrive.com/v1.0/shares/{token}/driveItem", headers=headers)
@@ -229,7 +229,7 @@ def download_onedrive_share(url: str) -> Path:
         suffix = Path(filename).suffix or ".xlsm"
         target = write_temp_workbook(data, suffix=suffix)
         ensure_excel_file(target)
-        return target
+        return target, filename
 
     for content_url in (
         f"https://api.onedrive.com/v1.0/shares/{token}/driveItem/content",
@@ -241,14 +241,14 @@ def download_onedrive_share(url: str) -> Path:
             suffix = Path(filename).suffix or ".xlsm"
             target = write_temp_workbook(data, suffix=suffix)
             ensure_excel_file(target)
-            return target
+            return target, filename
         except Exception:  # noqa: BLE001
             continue
 
     raise RuntimeError("OneDrive share metadata loaded, but no downloadable workbook URL was available.")
 
 
-def download_workbook(url: str) -> Path:
+def download_workbook(url: str) -> tuple[Path, str]:
     headers = {"User-Agent": "Mozilla/5.0 Codex Dashboard Refresher"}
 
     last_error: Exception | None = None
@@ -264,7 +264,7 @@ def download_workbook(url: str) -> Path:
                 if payload.startswith(b"PK\x03\x04"):
                     target = write_temp_workbook(payload, suffix=suffix)
                     ensure_excel_file(target)
-                    return target
+                    return target, filename
                 if "html" in content_type.lower():
                     nested_url = extract_download_url_from_html(payload.decode("utf-8", errors="ignore"))
                     if nested_url:
@@ -277,7 +277,7 @@ def download_workbook(url: str) -> Path:
                                 nested_suffix = Path(nested_name).suffix or ".xlsm"
                                 target = write_temp_workbook(nested_payload, suffix=nested_suffix)
                                 ensure_excel_file(target)
-                                return target
+                                return target, nested_name
                 raise RuntimeError(f"Workbook URL did not return an Excel file: {candidate}")
         except Exception as exc:  # noqa: BLE001
             last_error = exc
@@ -292,22 +292,23 @@ def download_workbook(url: str) -> Path:
     raise RuntimeError(f"Unable to download workbook from {url}") from last_error
 
 
-def resolve_workbook_source(workbook: str | None, workbook_url: str | None) -> tuple[Path, bool]:
+def resolve_workbook_source(workbook: str | None, workbook_url: str | None) -> tuple[Path, bool, str]:
     if workbook:
         path = Path(workbook).expanduser().resolve()
         if not path.exists():
             raise FileNotFoundError(f"Workbook not found: {path}")
-        return path, False
+        return path, False, path.name
 
     env_path = os.getenv("WORKBOOK_PATH")
     if env_path:
         path = Path(env_path).expanduser().resolve()
         if path.exists():
-            return path, False
+            return path, False, path.name
 
     url = workbook_url or os.getenv("WORKBOOK_URL")
     if url:
-        return download_workbook(url), True
+        path, workbook_name = download_workbook(url)
+        return path, True, workbook_name
 
     raise ValueError("Provide --workbook, WORKBOOK_PATH, --workbook-url, or WORKBOOK_URL.")
 
@@ -403,11 +404,11 @@ def build_payload(rows: list[dict[str, Any]], workbook_name: str) -> dict[str, A
 
 
 def refresh_dashboard_data(workbook: str | None = None, workbook_url: str | None = None, output: str | Path = "dashboard_data.json") -> Path:
-    workbook_path, is_temp = resolve_workbook_source(workbook, workbook_url)
+    workbook_path, is_temp, workbook_name = resolve_workbook_source(workbook, workbook_url)
     try:
         ref_map = load_reference_map(workbook_path)
         rows = build_rows(workbook_path, ref_map)
-        payload = build_payload(rows, workbook_path.name)
+        payload = build_payload(rows, workbook_name)
         output_path = Path(output).expanduser().resolve()
         output_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
         return output_path
