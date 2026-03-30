@@ -6,12 +6,14 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-$runnerScriptPath = (Resolve-Path (Join-Path $PSScriptRoot "run_local_autopublish.ps1")).Path
+$runnerScriptPath = (Resolve-Path (Join-Path $PSScriptRoot "run_local_autopublish.pyw")).Path
 $workbookFullPath = (Resolve-Path (Join-Path $PSScriptRoot $WorkbookPath)).Path
-$powershellPath = (Get-Command powershell.exe -ErrorAction Stop).Source
+$pythonPath = (Get-Command python -ErrorAction Stop).Source
+$pythonwPath = Join-Path (Split-Path $pythonPath) "pythonw.exe"
+$runnerExe = if (Test-Path $pythonwPath) { $pythonwPath } else { $pythonPath }
 $triggerTime = (Get-Date).AddMinutes(1)
-$taskArgs = '-NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -File "' + $runnerScriptPath + '" -WorkbookPath "' + $workbookFullPath + '"'
-$action = New-ScheduledTaskAction -Execute $powershellPath -Argument $taskArgs
+$taskArgs = '"' + $runnerScriptPath + '" --workbook "' + $workbookFullPath + '"'
+$action = New-ScheduledTaskAction -Execute $runnerExe -Argument $taskArgs -WorkingDirectory $PSScriptRoot
 $trigger = New-ScheduledTaskTrigger -Once -At $triggerTime -RepetitionInterval (New-TimeSpan -Minutes 1) -RepetitionDuration (New-TimeSpan -Days 3650)
 $settings = New-ScheduledTaskSettingsSet -StartWhenAvailable -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -MultipleInstances IgnoreNew
 
