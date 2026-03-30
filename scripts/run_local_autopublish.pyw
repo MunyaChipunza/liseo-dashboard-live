@@ -6,6 +6,9 @@ import sys
 import traceback
 from pathlib import Path
 
+os.environ.setdefault("PYTHONDONTWRITEBYTECODE", "1")
+sys.dont_write_bytecode = True
+
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 BUNDLE_DIR = SCRIPT_DIR.parent
@@ -33,7 +36,6 @@ def main() -> int:
     if not workbook_path.exists():
         raise FileNotFoundError(f"Workbook not found: {workbook_path}")
 
-    os.environ["PYTHONDONTWRITEBYTECODE"] = "1"
     push_dashboard(
         workbook_path=workbook_path,
         output_path=BUNDLE_DIR / "dashboard_data.json",
