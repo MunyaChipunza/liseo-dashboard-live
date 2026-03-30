@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import os
 import shutil
 import subprocess
 import sys
@@ -12,6 +13,9 @@ BUNDLE_DIR = SCRIPT_DIR.parent
 sys.path.insert(0, str(SCRIPT_DIR))
 
 from refresh_dashboard_data import refresh_dashboard_data  # noqa: E402
+
+
+CREATE_NO_WINDOW = getattr(subprocess, "CREATE_NO_WINDOW", 0)
 
 
 def parse_args() -> argparse.Namespace:
@@ -53,7 +57,20 @@ def git_executable() -> str:
 
 def run_git(*args: str, check: bool = True) -> subprocess.CompletedProcess[str]:
     command = [git_executable(), "-C", str(BUNDLE_DIR), *args]
-    return subprocess.run(command, check=check, text=True, capture_output=True)
+    startupinfo = None
+    if os.name == "nt":
+        startupinfo = subprocess.STARTUPINFO()
+        startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+        startupinfo.wShowWindow = 0
+
+    return subprocess.run(
+        command,
+        check=check,
+        text=True,
+        capture_output=True,
+        creationflags=CREATE_NO_WINDOW,
+        startupinfo=startupinfo,
+    )
 
 
 def ensure_identity() -> None:
