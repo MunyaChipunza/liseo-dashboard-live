@@ -12,31 +12,19 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 BUNDLE_DIR = SCRIPT_DIR.parent
 sys.path.insert(0, str(SCRIPT_DIR))
 
-from refresh_dashboard_data import refresh_dashboard_data  # noqa: E402
+from refresh_dashboard_data import find_default_workbook, refresh_dashboard_data  # noqa: E402
 
 
 CREATE_NO_WINDOW = getattr(subprocess, "CREATE_NO_WINDOW", 0)
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Refresh dashboard_data.json from the local workbook and push it to GitHub.")
-    parser.add_argument("--workbook", help="Optional local workbook path. If omitted, the script searches parent folders for .xlsm/.xlsx files.")
+    parser = argparse.ArgumentParser(description="Refresh dashboard_data.json and optionally push it to GitHub.")
+    parser.add_argument("--workbook", help="Optional local workbook path.")
+    parser.add_argument("--workbook-url", help="Optional public workbook URL for cloud refreshes.")
     parser.add_argument("--output", default="dashboard_data.json", help="Relative or absolute output path for the dashboard JSON.")
     parser.add_argument("--commit-message", default="Refresh dashboard data", help="Git commit message to use when the JSON changes.")
     return parser.parse_args()
-
-
-def find_default_workbook(bundle_dir: Path) -> Path | None:
-    search_roots = [bundle_dir.parent]
-    if bundle_dir.parent.parent != bundle_dir.parent:
-        search_roots.append(bundle_dir.parent.parent)
-
-    for root in search_roots:
-        for pattern in ("*.xlsm", "*.xlsx"):
-            matches = sorted(root.glob(pattern))
-            if matches:
-                return matches[0]
-    return None
 
 
 def git_executable() -> str:
@@ -73,6 +61,16 @@ def run_git(*args: str, check: bool = True) -> subprocess.CompletedProcess[str]:
     )
 
 
+def is_git_repo() -> bool:
+    result = run_git("rev-parse", "--is-inside-work-tree", check=False)
+    return result.returncode == 0 and result.stdout.strip() == "true"
+
+
+def has_origin() -> bool:
+    result = run_git("remote", "get-url", "origin", check=False)
+    return result.returncode == 0 and bool(result.stdout.strip())
+
+
 def ensure_identity() -> None:
     name = run_git("config", "--get", "user.name", check=False)
     email = run_git("config", "--get", "user.email", check=False)
@@ -99,9 +97,19 @@ def has_dashboard_changes(output_path: Path) -> bool:
     return bool(status.stdout.strip())
 
 
-def push_dashboard(workbook_path: Path, output_path: Path, commit_message: str) -> bool:
+def push_dashboard(workbook_path: Path | None, workbook_url: str | None, output_path: Path, commit_message: str) -> bool:
+    if not is_git_repo():
+        refresh_dashboard_data(workbook=str(workbook_path) if workbook_path else None, workbook_url=workbook_url, output=output_path)
+        print("Dashboard data refreshed locally. No Git repository detected, so nothing was pushed.")
+        return False
+
+    if not has_origin():
+        refresh_dashboard_data(workbook=str(workbook_path) if workbook_path else None, workbook_url=workbook_url, output=output_path)
+        print("Dashboard data refreshed locally. No origin remote is configured yet.")
+        return False
+
     sync_repo()
-    refresh_dashboard_data(workbook=str(workbook_path), output=output_path)
+    refresh_dashboard_data(workbook=str(workbook_path) if workbook_path else None, workbook_url=workbook_url, output=output_path)
 
     if not has_dashboard_changes(output_path):
         print("Dashboard data is already up to date.")
@@ -119,14 +127,19 @@ def push_dashboard(workbook_path: Path, output_path: Path, commit_message: str) 
 def main() -> None:
     args = parse_args()
     workbook_path = Path(args.workbook).expanduser().resolve() if args.workbook else find_default_workbook(BUNDLE_DIR)
-    if workbook_path is None or not workbook_path.exists():
+    if args.workbook and (workbook_path is None or not workbook_path.exists()):
         raise FileNotFoundError("Could not find the local workbook to publish.")
 
     output_path = Path(args.output).expanduser()
     if not output_path.is_absolute():
         output_path = (BUNDLE_DIR / output_path).resolve()
 
-    push_dashboard(workbook_path=workbook_path, output_path=output_path, commit_message=args.commit_message)
+    push_dashboard(
+        workbook_path=workbook_path if workbook_path and workbook_path.exists() else None,
+        workbook_url=args.workbook_url or os.environ.get("WORKBOOK_URL"),
+        output_path=output_path,
+        commit_message=args.commit_message,
+    )
 
 
 if __name__ == "__main__":
