@@ -1,15 +1,15 @@
 {
   "meta": {
     "workbookName": "Liseo Assemblies Master Sheet.xlsm",
-    "generatedAt": "2026-03-31T13:43:47.817243+00:00",
-    "generatedAtLabel": "31 Mar 2026 13:43 UTC",
-    "sourceModifiedAt": "2026-03-31T13:38:26+00:00",
+    "generatedAt": "2026-03-31T13:44:47.826932+00:00",
+    "generatedAtLabel": "31 Mar 2026 13:44 UTC",
+    "sourceModifiedAt": "2026-03-31T13:44:33+00:00",
     "sourceSheet": "Production Data"
   },
   "stats": {
-    "rows": 1531,
-    "totalUnits": 1547,
-    "totalPoints": 2861.5,
+    "rows": 1532,
+    "totalUnits": 1548,
+    "totalPoints": 2863.0,
     "techCount": 8,
     "activeTechCount": 2
   },
@@ -13791,6 +13791,15 @@
       "moNum": 3,
       "u": 1,
       "p": 3.0,
+      "s": "Active"
+    },
+    {
+      "tech": "Talent Mutanda",
+      "yr": 2026,
+      "mo": "Mar",
+      "moNum": 3,
+      "u": 1,
+      "p": 1.5,
       "s": "Active"
     }
   ]
