@@ -26,6 +26,7 @@ DEFAULT_OUTPUT = "dashboard_data.json"
 SOURCE_SHEET = "Production Data"
 REFERENCE_SHEET = "Reference"
 CREATE_NO_WINDOW = getattr(subprocess, "CREATE_NO_WINDOW", 0)
+EXCEL_MATCH_EXIT = 17
 
 ACTIVE_TECHS = {"Innocent Mhora", "Talent Mutanda"}
 MONTH_LABELS = {
@@ -377,7 +378,69 @@ def create_excel_snapshot(workbook_path: Path) -> Path:
     raise RuntimeError(last_message)
 
 
+def workbook_lockfile_path(workbook_path: Path) -> Path:
+    return workbook_path.with_name(f"~${workbook_path.name}")
+
+
+def is_workbook_open_in_excel(workbook_path: Path) -> bool:
+    if os.name != "nt":
+        return False
+
+    if workbook_lockfile_path(workbook_path).exists():
+        return True
+
+    escaped_path = str(workbook_path.resolve()).replace("'", "''")
+    command = rf"""
+$path = '{escaped_path}'
+try {{
+    $excel = [Runtime.InteropServices.Marshal]::GetActiveObject('Excel.Application')
+}} catch {{
+    exit 0
+}}
+
+$workbooks = $excel.Workbooks
+for ($index = 1; $index -le $workbooks.Count; $index++) {{
+    $candidate = $workbooks.Item($index)
+    if ($candidate.FullName -and [string]::Equals([System.IO.Path]::GetFullPath($candidate.FullName), $path, [System.StringComparison]::OrdinalIgnoreCase)) {{
+        exit {EXCEL_MATCH_EXIT}
+    }}
+}}
+
+exit 0
+"""
+
+    startupinfo = None
+    if os.name == "nt":
+        startupinfo = subprocess.STARTUPINFO()
+        startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+        startupinfo.wShowWindow = 0
+
+    result = subprocess.run(
+        [
+            "powershell",
+            "-NoProfile",
+            "-ExecutionPolicy",
+            "Bypass",
+            "-Command",
+            command,
+        ],
+        check=False,
+        text=True,
+        capture_output=True,
+        creationflags=CREATE_NO_WINDOW,
+        startupinfo=startupinfo,
+    )
+    return result.returncode == EXCEL_MATCH_EXIT
+
+
 def load_dashboard_workbook(workbook_path: Path) -> tuple[Any, Path | None]:
+    if is_workbook_open_in_excel(workbook_path):
+        try:
+            snapshot_path = create_excel_snapshot(workbook_path)
+            return load_workbook(snapshot_path, data_only=True, read_only=True), snapshot_path
+        except Exception:
+            pass
+
     try:
         return load_workbook(workbook_path, data_only=True, read_only=True), None
     except PermissionError:
