@@ -741,10 +741,70 @@ function teamSeries(periods) {
   });
 }
 
+function trendlineValues(values) {
+  var samples = [];
+  values.forEach(function(value, index) {
+    if (value === null || value === undefined) return;
+    samples.push({ x: index, y: Number(value) || 0 });
+  });
+
+  if (samples.length < 2) {
+    return values.map(function() { return null; });
+  }
+
+  var n = samples.length;
+  var sumX = 0;
+  var sumY = 0;
+  var sumXY = 0;
+  var sumXX = 0;
+
+  samples.forEach(function(sample) {
+    sumX += sample.x;
+    sumY += sample.y;
+    sumXY += sample.x * sample.y;
+    sumXX += sample.x * sample.x;
+  });
+
+  var denominator = (n * sumXX) - (sumX * sumX);
+  if (!denominator) {
+    return values.map(function() { return null; });
+  }
+
+  var slope = ((n * sumXY) - (sumX * sumY)) / denominator;
+  var intercept = (sumY - (slope * sumX)) / n;
+
+  return values.map(function(value, index) {
+    if (value === null || value === undefined) return null;
+    var projected = intercept + (slope * index);
+    if (metric === 'pct') projected = Math.max(0, Math.min(100, projected));
+    else projected = Math.max(0, projected);
+    return round1(projected);
+  });
+}
+
+function makeTrendSeries(name, values, color) {
+  if (selY === 'all') return null;
+  var trend = trendlineValues(values);
+  var hasValues = trend.some(function(value) {
+    return value !== null && value !== undefined;
+  });
+  if (!hasValues) return null;
+  return {
+    name: name + ' trend',
+    values: trend,
+    color: color,
+    dash: '8 6',
+    width: 2.2,
+    opacity: 0.72,
+    hidePoints: true
+  };
+}
+
 function renderLineChart(hostId, config) {
   var host = document.getElementById(hostId);
   var points = config.points || [];
   var series = (config.series || []).filter(function(line) {
+    if (!line || !line.values) return false;
     return line.values && line.values.length === points.length;
   });
 
@@ -816,8 +876,12 @@ function renderLineChart(hostId, config) {
       path += ((index === 0 || prev === null || prev === undefined) ? 'M' : 'L') + x(index) + ' ' + y(value) + ' ';
     });
 
-    drawn += '<path d="' + path + '" fill="none" stroke="' + line.color + '" stroke-width="' + (line.bold ? 3.6 : 2.4) + '" stroke-linecap="round" stroke-linejoin="round"></path>';
+    drawn += '<path d="' + path + '" fill="none" stroke="' + line.color + '" stroke-width="' + (line.width || (line.bold ? 3.6 : 2.4)) + '" stroke-linecap="round" stroke-linejoin="round"' +
+      (line.dash ? ' stroke-dasharray="' + line.dash + '"' : '') +
+      (typeof line.opacity === 'number' ? ' stroke-opacity="' + line.opacity + '"' : '') +
+      '></path>';
 
+    if (line.hidePoints) return;
     line.values.forEach(function(value, index) {
       if (value === null || value === undefined) return;
       drawn += '<circle cx="' + x(index) + '" cy="' + y(value) + '" r="' + (line.bold ? 4.5 : 3.2) + '" fill="' + line.color + '"><title>' +
@@ -852,51 +916,66 @@ function renderLineChart(hostId, config) {
 function buildCharts() {
   var periods = periodsForView();
   var techs = vt();
+  var selectedSeries = seriesForTech(selT, periods);
+  var averageLine = averageSeries(periods);
+  var restLine = restOfTeamSeries(periods);
+  var teamLine = teamSeries(periods);
+  var rosterTrend = makeTrendSeries(metric === 'pct' ? 'Average share' : 'Roster average', averageLine, colorFor(5));
+  var chart1Series = [
+    { name: selT, values: selectedSeries, color: colorFor(0), bold: true },
+    { name: metric === 'pct' ? 'Average share' : 'Average technician', values: averageLine, color: colorFor(4) }
+  ];
+  var chart2Series = [
+    { name: selT, values: selectedSeries, color: colorFor(0), bold: true },
+    { name: metric === 'pct' ? 'Remaining share' : 'Rest of team', values: restLine, color: colorFor(2) },
+    { name: 'Team total', values: teamLine, color: colorFor(1) }
+  ];
+  var chart3Series = techs.map(function(tech, index) {
+    return { name: tech, values: seriesForTech(tech, periods), color: colorFor(index), bold: tech === selT };
+  });
+  var selectedTrend = makeTrendSeries(selT, selectedSeries, colorFor(0));
+  var teamTrend = makeTrendSeries('Team total', teamLine, colorFor(1));
+
+  if (selectedTrend) chart1Series.push(selectedTrend);
+  if (selectedTrend) chart2Series.push(selectedTrend);
+  if (teamTrend) chart2Series.push(teamTrend);
+  if (rosterTrend) chart3Series.push(rosterTrend);
 
   document.getElementById('cpill1').textContent = metricLabel();
   document.getElementById('cpill2').textContent = metricLabel();
   document.getElementById('cpill3').textContent = metricLabel();
 
-  document.getElementById('csub1').textContent = selT + ' versus the period average for ' + shortYearLabel();
-  document.getElementById('csub2').textContent = 'Selected technician, rest of team, and total team trend';
-  document.getElementById('csub3').textContent = shortYearLabel() + ' - visible technicians trending against one another';
+  document.getElementById('csub1').textContent = selT + ' versus the period average for ' + shortYearLabel() + (selY === 'all' ? '' : ' with trendline');
+  document.getElementById('csub2').textContent = 'Selected technician, rest of team, and total team trend' + (selY === 'all' ? '' : ' with trendlines');
+  document.getElementById('csub3').textContent = shortYearLabel() + ' - visible technicians trending against one another' + (selY === 'all' ? '' : ' with roster trend');
 
   renderLineChart('chart1', {
     points: periods,
-    series: [
-      { name: selT, values: seriesForTech(selT, periods), color: colorFor(0), bold: true },
-      { name: metric === 'pct' ? 'Average share' : 'Average technician', values: averageSeries(periods), color: colorFor(4) }
-    ],
+    series: chart1Series,
     min: 0,
     max: metric === 'pct' ? 100 : null,
     noteLeft: shortYearLabel() + ' - ' + metricLabel(),
-    noteRight: 'Selected technician focus',
+    noteRight: selY === 'all' ? 'Selected technician focus' : 'Dashed line shows the trend',
     aria: 'Selected technician trend chart'
   });
 
   renderLineChart('chart2', {
     points: periods,
-    series: [
-      { name: selT, values: seriesForTech(selT, periods), color: colorFor(0), bold: true },
-      { name: metric === 'pct' ? 'Remaining share' : 'Rest of team', values: restOfTeamSeries(periods), color: colorFor(2) },
-      { name: 'Team total', values: teamSeries(periods), color: colorFor(1) }
-    ],
+    series: chart2Series,
     min: 0,
     max: metric === 'pct' ? 100 : null,
     noteLeft: 'Individual versus combined',
-    noteRight: scope === 'active' ? 'Active roster only' : 'Full roster',
+    noteRight: selY === 'all' ? (scope === 'active' ? 'Active roster only' : 'Full roster') : 'Dashed lines show direction',
     aria: 'Selected versus combined performance chart'
   });
 
   renderLineChart('chart3', {
     points: periods,
-    series: techs.map(function(tech, index) {
-      return { name: tech, values: seriesForTech(tech, periods), color: colorFor(index), bold: tech === selT };
-    }),
+    series: chart3Series,
     min: 0,
     max: metric === 'pct' ? 100 : null,
     noteLeft: 'Roster comparison',
-    noteRight: techs.length + ' technicians shown',
+    noteRight: selY === 'all' ? techs.length + ' technicians shown' : 'Dashed line shows overall direction',
     aria: 'Roster comparison chart'
   });
 }
