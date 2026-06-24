@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import shutil
 import subprocess
@@ -97,6 +98,32 @@ def has_dashboard_changes(output_path: Path) -> bool:
     return bool(status.stdout.strip())
 
 
+def load_head_json(rel_output: Path) -> dict | None:
+    result = run_git("show", f"HEAD:{rel_output.as_posix()}", check=False)
+    if result.returncode != 0 or not result.stdout.strip():
+        return None
+    return json.loads(result.stdout)
+
+
+def strip_volatile_meta(payload: dict) -> dict:
+    normalized = json.loads(json.dumps(payload))
+    meta = normalized.get("meta")
+    if isinstance(meta, dict):
+        meta.pop("generatedAt", None)
+        meta.pop("generatedAtLabel", None)
+    return normalized
+
+
+def has_meaningful_dashboard_changes(output_path: Path) -> bool:
+    rel_output = output_path.relative_to(BUNDLE_DIR)
+    head_payload = load_head_json(rel_output)
+    if head_payload is None:
+        return True
+
+    current_payload = json.loads(output_path.read_text(encoding="utf-8"))
+    return strip_volatile_meta(current_payload) != strip_volatile_meta(head_payload)
+
+
 def push_dashboard(workbook_path: Path | None, workbook_url: str | None, output_path: Path, commit_message: str) -> bool:
     if not is_git_repo():
         refresh_dashboard_data(workbook=str(workbook_path) if workbook_path else None, workbook_url=workbook_url, output=output_path)
@@ -113,6 +140,12 @@ def push_dashboard(workbook_path: Path | None, workbook_url: str | None, output_
 
     if not has_dashboard_changes(output_path):
         print("Dashboard data is already up to date.")
+        return False
+
+    if not has_meaningful_dashboard_changes(output_path):
+        rel_output = output_path.relative_to(BUNDLE_DIR)
+        run_git("restore", "--", str(rel_output))
+        print("Dashboard data metadata refreshed locally, but workbook content is unchanged.")
         return False
 
     ensure_identity()
