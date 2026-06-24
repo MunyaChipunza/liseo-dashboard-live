@@ -1,15 +1,15 @@
 {
   "meta": {
     "workbookName": "Liseo Assemblies Master Sheet.xlsm",
-    "generatedAt": "2026-05-04T13:38:33.374249+00:00",
-    "generatedAtLabel": "04 May 2026 13:38 UTC",
-    "sourceModifiedAt": "2026-05-03T19:02:29+00:00",
+    "generatedAt": "2026-06-24T06:52:12.043653+00:00",
+    "generatedAtLabel": "24 Jun 2026 06:52 UTC",
+    "sourceModifiedAt": "2026-06-23T19:44:18+00:00",
     "sourceSheet": "Production Data"
   },
   "stats": {
-    "rows": 1559,
-    "totalUnits": 1575,
-    "totalPoints": 2919.0,
+    "rows": 1625,
+    "totalUnits": 1641,
+    "totalPoints": 3053.0,
     "techCount": 8,
     "activeTechCount": 2
   },
@@ -14041,6 +14041,600 @@
       "yr": 2026,
       "mo": "Apr",
       "moNum": 4,
+      "u": 1,
+      "p": 2.0,
+      "s": "Active"
+    },
+    {
+      "tech": "Talent Mutanda",
+      "yr": 2026,
+      "mo": "May",
+      "moNum": 5,
+      "u": 1,
+      "p": 1.5,
+      "s": "Active"
+    },
+    {
+      "tech": "Innocent Mhora",
+      "yr": 2026,
+      "mo": "May",
+      "moNum": 5,
+      "u": 1,
+      "p": 1.0,
+      "s": "Active"
+    },
+    {
+      "tech": "Innocent Mhora",
+      "yr": 2026,
+      "mo": "May",
+      "moNum": 5,
+      "u": 1,
+      "p": 1.0,
+      "s": "Active"
+    },
+    {
+      "tech": "Talent Mutanda",
+      "yr": 2026,
+      "mo": "May",
+      "moNum": 5,
+      "u": 1,
+      "p": 1.5,
+      "s": "Active"
+    },
+    {
+      "tech": "Innocent Mhora",
+      "yr": 2026,
+      "mo": "May",
+      "moNum": 5,
+      "u": 1,
+      "p": 2.5,
+      "s": "Active"
+    },
+    {
+      "tech": "Talent Mutanda",
+      "yr": 2026,
+      "mo": "May",
+      "moNum": 5,
+      "u": 1,
+      "p": 2.5,
+      "s": "Active"
+    },
+    {
+      "tech": "Innocent Mhora",
+      "yr": 2026,
+      "mo": "May",
+      "moNum": 5,
+      "u": 1,
+      "p": 3.0,
+      "s": "Active"
+    },
+    {
+      "tech": "Talent Mutanda",
+      "yr": 2026,
+      "mo": "May",
+      "moNum": 5,
+      "u": 1,
+      "p": 3.0,
+      "s": "Active"
+    },
+    {
+      "tech": "Talent Mutanda",
+      "yr": 2026,
+      "mo": "May",
+      "moNum": 5,
+      "u": 1,
+      "p": 1.0,
+      "s": "Active"
+    },
+    {
+      "tech": "Talent Mutanda",
+      "yr": 2026,
+      "mo": "May",
+      "moNum": 5,
+      "u": 1,
+      "p": 2.5,
+      "s": "Active"
+    },
+    {
+      "tech": "Talent Mutanda",
+      "yr": 2026,
+      "mo": "May",
+      "moNum": 5,
+      "u": 1,
+      "p": 1.0,
+      "s": "Active"
+    },
+    {
+      "tech": "Talent Mutanda",
+      "yr": 2026,
+      "mo": "May",
+      "moNum": 5,
+      "u": 1,
+      "p": 2.0,
+      "s": "Active"
+    },
+    {
+      "tech": "Talent Mutanda",
+      "yr": 2026,
+      "mo": "May",
+      "moNum": 5,
+      "u": 1,
+      "p": 2.5,
+      "s": "Active"
+    },
+    {
+      "tech": "Talent Mutanda",
+      "yr": 2026,
+      "mo": "May",
+      "moNum": 5,
+      "u": 1,
+      "p": 2.5,
+      "s": "Active"
+    },
+    {
+      "tech": "Talent Mutanda",
+      "yr": 2026,
+      "mo": "May",
+      "moNum": 5,
+      "u": 1,
+      "p": 2.5,
+      "s": "Active"
+    },
+    {
+      "tech": "Innocent Mhora",
+      "yr": 2026,
+      "mo": "May",
+      "moNum": 5,
+      "u": 1,
+      "p": 2.5,
+      "s": "Active"
+    },
+    {
+      "tech": "Talent Mutanda",
+      "yr": 2026,
+      "mo": "May",
+      "moNum": 5,
+      "u": 1,
+      "p": 1.5,
+      "s": "Active"
+    },
+    {
+      "tech": "Talent Mutanda",
+      "yr": 2026,
+      "mo": "May",
+      "moNum": 5,
+      "u": 1,
+      "p": 3.0,
+      "s": "Active"
+    },
+    {
+      "tech": "Innocent Mhora",
+      "yr": 2026,
+      "mo": "May",
+      "moNum": 5,
+      "u": 1,
+      "p": 2.5,
+      "s": "Active"
+    },
+    {
+      "tech": "Innocent Mhora",
+      "yr": 2026,
+      "mo": "May",
+      "moNum": 5,
+      "u": 1,
+      "p": 2.0,
+      "s": "Active"
+    },
+    {
+      "tech": "Talent Mutanda",
+      "yr": 2026,
+      "mo": "May",
+      "moNum": 5,
+      "u": 1,
+      "p": 1.5,
+      "s": "Active"
+    },
+    {
+      "tech": "Talent Mutanda",
+      "yr": 2026,
+      "mo": "May",
+      "moNum": 5,
+      "u": 1,
+      "p": 1.5,
+      "s": "Active"
+    },
+    {
+      "tech": "Innocent Mhora",
+      "yr": 2026,
+      "mo": "May",
+      "moNum": 5,
+      "u": 1,
+      "p": 1.5,
+      "s": "Active"
+    },
+    {
+      "tech": "Innocent Mhora",
+      "yr": 2026,
+      "mo": "May",
+      "moNum": 5,
+      "u": 1,
+      "p": 3.0,
+      "s": "Active"
+    },
+    {
+      "tech": "Innocent Mhora",
+      "yr": 2026,
+      "mo": "May",
+      "moNum": 5,
+      "u": 1,
+      "p": 1.5,
+      "s": "Active"
+    },
+    {
+      "tech": "Talent Mutanda",
+      "yr": 2026,
+      "mo": "May",
+      "moNum": 5,
+      "u": 1,
+      "p": 1.5,
+      "s": "Active"
+    },
+    {
+      "tech": "Talent Mutanda",
+      "yr": 2026,
+      "mo": "May",
+      "moNum": 5,
+      "u": 1,
+      "p": 1.5,
+      "s": "Active"
+    },
+    {
+      "tech": "Innocent Mhora",
+      "yr": 2026,
+      "mo": "May",
+      "moNum": 5,
+      "u": 1,
+      "p": 3.0,
+      "s": "Active"
+    },
+    {
+      "tech": "Innocent Mhora",
+      "yr": 2026,
+      "mo": "May",
+      "moNum": 5,
+      "u": 1,
+      "p": 2.0,
+      "s": "Active"
+    },
+    {
+      "tech": "Innocent Mhora",
+      "yr": 2026,
+      "mo": "May",
+      "moNum": 5,
+      "u": 1,
+      "p": 3.0,
+      "s": "Active"
+    },
+    {
+      "tech": "Innocent Mhora",
+      "yr": 2026,
+      "mo": "May",
+      "moNum": 5,
+      "u": 1,
+      "p": 2.5,
+      "s": "Active"
+    },
+    {
+      "tech": "Talent Mutanda",
+      "yr": 2026,
+      "mo": "May",
+      "moNum": 5,
+      "u": 1,
+      "p": 1.5,
+      "s": "Active"
+    },
+    {
+      "tech": "Talent Mutanda",
+      "yr": 2026,
+      "mo": "May",
+      "moNum": 5,
+      "u": 1,
+      "p": 2.5,
+      "s": "Active"
+    },
+    {
+      "tech": "Talent Mutanda",
+      "yr": 2026,
+      "mo": "May",
+      "moNum": 5,
+      "u": 1,
+      "p": 1.5,
+      "s": "Active"
+    },
+    {
+      "tech": "Innocent Mhora",
+      "yr": 2026,
+      "mo": "May",
+      "moNum": 5,
+      "u": 1,
+      "p": 1.0,
+      "s": "Active"
+    },
+    {
+      "tech": "Innocent Mhora",
+      "yr": 2026,
+      "mo": "May",
+      "moNum": 5,
+      "u": 1,
+      "p": 2.0,
+      "s": "Active"
+    },
+    {
+      "tech": "Innocent Mhora",
+      "yr": 2026,
+      "mo": "May",
+      "moNum": 5,
+      "u": 1,
+      "p": 1.5,
+      "s": "Active"
+    },
+    {
+      "tech": "Innocent Mhora",
+      "yr": 2026,
+      "mo": "May",
+      "moNum": 5,
+      "u": 1,
+      "p": 2.5,
+      "s": "Active"
+    },
+    {
+      "tech": "Talent Mutanda",
+      "yr": 2026,
+      "mo": "May",
+      "moNum": 5,
+      "u": 1,
+      "p": 3.0,
+      "s": "Active"
+    },
+    {
+      "tech": "Talent Mutanda",
+      "yr": 2026,
+      "mo": "May",
+      "moNum": 5,
+      "u": 1,
+      "p": 3.0,
+      "s": "Active"
+    },
+    {
+      "tech": "Innocent Mhora",
+      "yr": 2026,
+      "mo": "May",
+      "moNum": 5,
+      "u": 1,
+      "p": 2.5,
+      "s": "Active"
+    },
+    {
+      "tech": "Talent Mutanda",
+      "yr": 2026,
+      "mo": "May",
+      "moNum": 5,
+      "u": 1,
+      "p": 2.5,
+      "s": "Active"
+    },
+    {
+      "tech": "Talent Mutanda",
+      "yr": 2026,
+      "mo": "May",
+      "moNum": 5,
+      "u": 1,
+      "p": 2.5,
+      "s": "Active"
+    },
+    {
+      "tech": "Innocent Mhora",
+      "yr": 2026,
+      "mo": "May",
+      "moNum": 5,
+      "u": 1,
+      "p": 2.5,
+      "s": "Active"
+    },
+    {
+      "tech": "Innocent Mhora",
+      "yr": 2026,
+      "mo": "May",
+      "moNum": 5,
+      "u": 1,
+      "p": 1.5,
+      "s": "Active"
+    },
+    {
+      "tech": "Talent Mutanda",
+      "yr": 2026,
+      "mo": "May",
+      "moNum": 5,
+      "u": 1,
+      "p": 1.5,
+      "s": "Active"
+    },
+    {
+      "tech": "Talent Mutanda",
+      "yr": 2026,
+      "mo": "May",
+      "moNum": 5,
+      "u": 1,
+      "p": 1.5,
+      "s": "Active"
+    },
+    {
+      "tech": "Innocent Mhora",
+      "yr": 2026,
+      "mo": "May",
+      "moNum": 5,
+      "u": 1,
+      "p": 1.5,
+      "s": "Active"
+    },
+    {
+      "tech": "Innocent Mhora",
+      "yr": 2026,
+      "mo": "Jun",
+      "moNum": 6,
+      "u": 1,
+      "p": 2.5,
+      "s": "Active"
+    },
+    {
+      "tech": "Innocent Mhora",
+      "yr": 2026,
+      "mo": "Jun",
+      "moNum": 6,
+      "u": 1,
+      "p": 2.0,
+      "s": "Active"
+    },
+    {
+      "tech": "Innocent Mhora",
+      "yr": 2026,
+      "mo": "Jun",
+      "moNum": 6,
+      "u": 1,
+      "p": 3.0,
+      "s": "Active"
+    },
+    {
+      "tech": "Talent Mutanda",
+      "yr": 2026,
+      "mo": "Jun",
+      "moNum": 6,
+      "u": 1,
+      "p": 3.0,
+      "s": "Active"
+    },
+    {
+      "tech": "Talent Mutanda",
+      "yr": 2026,
+      "mo": "Jun",
+      "moNum": 6,
+      "u": 1,
+      "p": 1.5,
+      "s": "Active"
+    },
+    {
+      "tech": "Talent Mutanda",
+      "yr": 2026,
+      "mo": "Jun",
+      "moNum": 6,
+      "u": 1,
+      "p": 1.0,
+      "s": "Active"
+    },
+    {
+      "tech": "Innocent Mhora",
+      "yr": 2026,
+      "mo": "Jun",
+      "moNum": 6,
+      "u": 1,
+      "p": 1.0,
+      "s": "Active"
+    },
+    {
+      "tech": "Talent Mutanda",
+      "yr": 2026,
+      "mo": "Jun",
+      "moNum": 6,
+      "u": 1,
+      "p": 1.0,
+      "s": "Active"
+    },
+    {
+      "tech": "Talent Mutanda",
+      "yr": 2026,
+      "mo": "Jun",
+      "moNum": 6,
+      "u": 1,
+      "p": 1.0,
+      "s": "Active"
+    },
+    {
+      "tech": "Innocent Mhora",
+      "yr": 2026,
+      "mo": "Jun",
+      "moNum": 6,
+      "u": 1,
+      "p": 2.5,
+      "s": "Active"
+    },
+    {
+      "tech": "Innocent Mhora",
+      "yr": 2026,
+      "mo": "Jun",
+      "moNum": 6,
+      "u": 1,
+      "p": 2.5,
+      "s": "Active"
+    },
+    {
+      "tech": "Innocent Mhora",
+      "yr": 2026,
+      "mo": "Jun",
+      "moNum": 6,
+      "u": 1,
+      "p": 2.0,
+      "s": "Active"
+    },
+    {
+      "tech": "Talent Mutanda",
+      "yr": 2026,
+      "mo": "Jun",
+      "moNum": 6,
+      "u": 1,
+      "p": 2.0,
+      "s": "Active"
+    },
+    {
+      "tech": "Innocent Mhora",
+      "yr": 2026,
+      "mo": "Jun",
+      "moNum": 6,
+      "u": 1,
+      "p": 2.5,
+      "s": "Active"
+    },
+    {
+      "tech": "Innocent Mhora",
+      "yr": 2026,
+      "mo": "Jun",
+      "moNum": 6,
+      "u": 1,
+      "p": 1.5,
+      "s": "Active"
+    },
+    {
+      "tech": "Innocent Mhora",
+      "yr": 2026,
+      "mo": "Jun",
+      "moNum": 6,
+      "u": 1,
+      "p": 3.0,
+      "s": "Active"
+    },
+    {
+      "tech": "Talent Mutanda",
+      "yr": 2026,
+      "mo": "Jun",
+      "moNum": 6,
+      "u": 1,
+      "p": 1.5,
+      "s": "Active"
+    },
+    {
+      "tech": "Innocent Mhora",
+      "yr": 2026,
+      "mo": "Jun",
+      "moNum": 6,
       "u": 1,
       "p": 2.0,
       "s": "Active"
