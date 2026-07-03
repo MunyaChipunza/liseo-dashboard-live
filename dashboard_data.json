@@ -1,15 +1,15 @@
 {
   "meta": {
     "workbookName": "Liseo Assemblies Master Sheet.xlsm",
-    "generatedAt": "2026-07-03T09:48:34.419032+00:00",
-    "generatedAtLabel": "03 Jul 2026 09:48 UTC",
-    "sourceModifiedAt": "2026-07-03T09:47:40+00:00",
+    "generatedAt": "2026-07-03T10:52:47.116618+00:00",
+    "generatedAtLabel": "03 Jul 2026 10:52 UTC",
+    "sourceModifiedAt": "2026-07-03T09:59:40+00:00",
     "sourceSheet": "Production Data"
   },
   "stats": {
-    "rows": 1609,
-    "totalUnits": 1625,
-    "totalPoints": 3030.0,
+    "rows": 1598,
+    "totalUnits": 1614,
+    "totalPoints": 3013.5,
     "techCount": 8,
     "activeTechCount": 2
   },
@@ -9398,15 +9398,6 @@
       "mo": "Jul",
       "moNum": 7,
       "u": 1,
-      "p": 1.5,
-      "s": "Inactive"
-    },
-    {
-      "tech": "Alferis Tembo",
-      "yr": 2024,
-      "mo": "Jul",
-      "moNum": 7,
-      "u": 1,
       "p": 2.5,
       "s": "Inactive"
     },
@@ -9967,24 +9958,6 @@
       "u": 1,
       "p": 2.5,
       "s": "Inactive"
-    },
-    {
-      "tech": "Alferis Tembo",
-      "yr": 2024,
-      "mo": "Oct",
-      "moNum": 10,
-      "u": 1,
-      "p": 1.5,
-      "s": "Inactive"
-    },
-    {
-      "tech": "Innocent Mhora",
-      "yr": 2024,
-      "mo": "Oct",
-      "moNum": 10,
-      "u": 1,
-      "p": 1.5,
-      "s": "Active"
     },
     {
       "tech": "Innocent Mhora",
@@ -12215,15 +12188,6 @@
       "mo": "Jul",
       "moNum": 7,
       "u": 1,
-      "p": 1.5,
-      "s": "Inactive"
-    },
-    {
-      "tech": "Alferis Tembo",
-      "yr": 2025,
-      "mo": "Jul",
-      "moNum": 7,
-      "u": 1,
       "p": 2.0,
       "s": "Inactive"
     },
@@ -12404,15 +12368,6 @@
       "mo": "Aug",
       "moNum": 8,
       "u": 1,
-      "p": 1.5,
-      "s": "Inactive"
-    },
-    {
-      "tech": "Antonio Chauque",
-      "yr": 2025,
-      "mo": "Aug",
-      "moNum": 8,
-      "u": 1,
       "p": 2.5,
       "s": "Inactive"
     },
@@ -12427,15 +12382,6 @@
     },
     {
       "tech": "Alferis Tembo",
-      "yr": 2025,
-      "mo": "Aug",
-      "moNum": 8,
-      "u": 1,
-      "p": 1.5,
-      "s": "Inactive"
-    },
-    {
-      "tech": "Antonio Chauque",
       "yr": 2025,
       "mo": "Aug",
       "moNum": 8,
@@ -12750,15 +12696,6 @@
       "s": "Active"
     },
     {
-      "tech": "Antonio Chauque",
-      "yr": 2025,
-      "mo": "Sep",
-      "moNum": 9,
-      "u": 1,
-      "p": 1.5,
-      "s": "Inactive"
-    },
-    {
       "tech": "Alferis Tembo",
       "yr": 2025,
       "mo": "Sep",
@@ -12999,15 +12936,6 @@
       "moNum": 10,
       "u": 1,
       "p": 2.0,
-      "s": "Inactive"
-    },
-    {
-      "tech": "Antonio Chauque",
-      "yr": 2025,
-      "mo": "Oct",
-      "moNum": 10,
-      "u": 1,
-      "p": 1.5,
       "s": "Inactive"
     },
     {
@@ -13376,15 +13304,6 @@
       "mo": "Mar",
       "moNum": 3,
       "u": 1,
-      "p": 1.5,
-      "s": "Active"
-    },
-    {
-      "tech": "Innocent Mhora",
-      "yr": 2026,
-      "mo": "Mar",
-      "moNum": 3,
-      "u": 1,
       "p": 2.0,
       "s": "Active"
     },
@@ -14061,24 +13980,6 @@
       "moNum": 5,
       "u": 1,
       "p": 3.0,
-      "s": "Active"
-    },
-    {
-      "tech": "Innocent Mhora",
-      "yr": 2026,
-      "mo": "May",
-      "moNum": 5,
-      "u": 1,
-      "p": 1.5,
-      "s": "Active"
-    },
-    {
-      "tech": "Talent Mutanda",
-      "yr": 2026,
-      "mo": "May",
-      "moNum": 5,
-      "u": 1,
-      "p": 1.5,
       "s": "Active"
     },
     {
