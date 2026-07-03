@@ -1,15 +1,15 @@
 {
   "meta": {
     "workbookName": "Liseo Assemblies Master Sheet.xlsm",
-    "generatedAt": "2026-07-03T09:41:33.232890+00:00",
-    "generatedAtLabel": "03 Jul 2026 09:41 UTC",
-    "sourceModifiedAt": "2026-07-03T09:40:30+00:00",
+    "generatedAt": "2026-07-03T09:42:33.480420+00:00",
+    "generatedAtLabel": "03 Jul 2026 09:42 UTC",
+    "sourceModifiedAt": "2026-07-03T09:42:04+00:00",
     "sourceSheet": "Production Data"
   },
   "stats": {
-    "rows": 1617,
-    "totalUnits": 1633,
-    "totalPoints": 3047.0,
+    "rows": 1614,
+    "totalUnits": 1630,
+    "totalPoints": 3038.0,
     "techCount": 8,
     "activeTechCount": 2
   },
@@ -9654,15 +9654,6 @@
       "s": "Inactive"
     },
     {
-      "tech": "Antonio Chauque",
-      "yr": 2024,
-      "mo": "Aug",
-      "moNum": 8,
-      "u": 1,
-      "p": 3.0,
-      "s": "Inactive"
-    },
-    {
       "tech": "Alferis Tembo",
       "yr": 2024,
       "mo": "Aug",
@@ -10883,15 +10874,6 @@
       "mo": "Mar",
       "moNum": 3,
       "u": 1,
-      "p": 3.0,
-      "s": "Inactive"
-    },
-    {
-      "tech": "Alferis Tembo",
-      "yr": 2025,
-      "mo": "Mar",
-      "moNum": 3,
-      "u": 1,
       "p": 2.5,
       "s": "Inactive"
     },
@@ -11838,15 +11820,6 @@
       "moNum": 6,
       "u": 1,
       "p": 2.5,
-      "s": "Inactive"
-    },
-    {
-      "tech": "Antonio Chauque",
-      "yr": 2025,
-      "mo": "Jun",
-      "moNum": 6,
-      "u": 1,
-      "p": 3.0,
       "s": "Inactive"
     },
     {
