@@ -1,15 +1,15 @@
 {
   "meta": {
     "workbookName": "Liseo Assemblies Master Sheet.xlsm",
-    "generatedAt": "2026-07-03T09:45:33.123335+00:00",
-    "generatedAtLabel": "03 Jul 2026 09:45 UTC",
-    "sourceModifiedAt": "2026-07-03T09:44:56+00:00",
+    "generatedAt": "2026-07-03T09:46:33.116351+00:00",
+    "generatedAtLabel": "03 Jul 2026 09:46 UTC",
+    "sourceModifiedAt": "2026-07-03T09:46:08+00:00",
     "sourceSheet": "Production Data"
   },
   "stats": {
-    "rows": 1614,
-    "totalUnits": 1630,
-    "totalPoints": 3038.0,
+    "rows": 1609,
+    "totalUnits": 1625,
+    "totalPoints": 3030.0,
     "techCount": 8,
     "activeTechCount": 2
   },
@@ -9438,15 +9438,6 @@
       "s": "Inactive"
     },
     {
-      "tech": "Alferis Tembo",
-      "yr": 2024,
-      "mo": "Jul",
-      "moNum": 7,
-      "u": 1,
-      "p": 1.5,
-      "s": "Inactive"
-    },
-    {
       "tech": "Antonio Chauque",
       "yr": 2024,
       "mo": "Jul",
@@ -9948,15 +9939,6 @@
       "moNum": 10,
       "u": 1,
       "p": 3.0,
-      "s": "Inactive"
-    },
-    {
-      "tech": "Antonio Chauque",
-      "yr": 2024,
-      "mo": "Oct",
-      "moNum": 10,
-      "u": 1,
-      "p": 1.5,
       "s": "Inactive"
     },
     {
@@ -11297,15 +11279,6 @@
       "mo": "May",
       "moNum": 5,
       "u": 1,
-      "p": 2.0,
-      "s": "Inactive"
-    },
-    {
-      "tech": "Antonio Chauque",
-      "yr": 2025,
-      "mo": "May",
-      "moNum": 5,
-      "u": 1,
       "p": 2.5,
       "s": "Inactive"
     },
@@ -11865,15 +11838,6 @@
       "moNum": 6,
       "u": 1,
       "p": 2.0,
-      "s": "Inactive"
-    },
-    {
-      "tech": "Antonio Chauque",
-      "yr": 2025,
-      "mo": "Jun",
-      "moNum": 6,
-      "u": 1,
-      "p": 1.5,
       "s": "Inactive"
     },
     {
@@ -12823,15 +12787,6 @@
     },
     {
       "tech": "Alferis Tembo",
-      "yr": 2025,
-      "mo": "Sep",
-      "moNum": 9,
-      "u": 1,
-      "p": 1.5,
-      "s": "Inactive"
-    },
-    {
-      "tech": "Antonio Chauque",
       "yr": 2025,
       "mo": "Sep",
       "moNum": 9,
