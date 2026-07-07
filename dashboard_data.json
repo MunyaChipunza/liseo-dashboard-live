@@ -1,15 +1,15 @@
 {
   "meta": {
     "workbookName": "Liseo Assemblies Master Sheet.xlsm",
-    "generatedAt": "2026-07-03T10:54:41.373209+00:00",
-    "generatedAtLabel": "03 Jul 2026 10:54 UTC",
-    "sourceModifiedAt": "2026-07-03T10:20:50+00:00",
+    "generatedAt": "2026-07-07T14:33:32.447449+00:00",
+    "generatedAtLabel": "07 Jul 2026 14:33 UTC",
+    "sourceModifiedAt": "2026-07-07T14:33:05+00:00",
     "sourceSheet": "Production Data"
   },
   "stats": {
-    "rows": 1561,
-    "totalUnits": 1577,
-    "totalPoints": 2933.5,
+    "rows": 1562,
+    "totalUnits": 1578,
+    "totalPoints": 2936.0,
     "techCount": 8,
     "activeTechCount": 2
   },
@@ -14061,6 +14061,15 @@
       "moNum": 6,
       "u": 1,
       "p": 3.0,
+      "s": "Active"
+    },
+    {
+      "tech": "Innocent Mhora",
+      "yr": 2026,
+      "mo": "Jul",
+      "moNum": 7,
+      "u": 1,
+      "p": 2.5,
       "s": "Active"
     }
   ]
